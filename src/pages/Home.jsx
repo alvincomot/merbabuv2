@@ -14,7 +14,7 @@ function Home() {
         <div className="w-full">
           <div className="space-y-4 md:space-y-8">
             <img
-              src="/top-footage.png"
+              src="/footage1.png"
               className="w-full h-145 object-cover object-bottom rounded"
               alt=""
             />
