@@ -18,7 +18,7 @@ const Home = () => {
               className="w-full h-145 object-cover object-bottom rounded"
               alt=""
             />
-            <div className="absolute bottom-0 left-0 p-4 md:p-8">
+            <div data-aos="fade-up"  data-aos-duration="1300" className="absolute bottom-0 left-0 p-4 md:p-8">
               <h1 className="text-white text-3xl md:text-5xl font-bold [text-shadow:_0_2px_4px_rgb(0_0_0_/_50%)]">
                 Desa Cuntel
               </h1>
@@ -30,7 +30,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section data-aos="zoom-in">
+      <section data-aos="zoom-in" data-aos-duration="500">
         <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8">
           <p>
             <span className="text-3xl text-black">L</span>orem ipsum, dolor sit
@@ -54,7 +54,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section data-aos="fade-right">
+      <section data-aos="fade-right" data-aos-duration="1300">
         <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-center md:gap-8">
             <div>
@@ -82,7 +82,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section data-aos="fade-right">
+      <section data-aos="fade-right" data-aos-duration="1300">
         <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-center md:gap-8">
             <div className="order-last md:order-none">
@@ -109,7 +109,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section data-aos="fade-right">
+      <section data-aos="fade-right" data-aos-duration="1300">
         <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-center md:gap-8">
             <div>
