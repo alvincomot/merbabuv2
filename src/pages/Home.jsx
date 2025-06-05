@@ -1,5 +1,6 @@
 import Aos from "aos";
 import "aos/dist/aos.css";
+import MainLayouts from '../components/layouts/MainLayouts'
 import React, { useEffect } from "react";
 
 function Home() {
@@ -7,7 +8,8 @@ function Home() {
     Aos.init();
   }, []);
   return (
-    <>
+    <div>
+      <MainLayouts>
       <section id="home">
         <div className="w-full">
           <div className="space-y-4 md:space-y-8">
@@ -80,7 +82,7 @@ function Home() {
         </div>
       </section>
 
-      <section data-aos="fade-left">
+      <section data-aos="fade-right">
         <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-center md:gap-8">
             <div className="order-last md:order-none">
@@ -134,7 +136,8 @@ function Home() {
           </div>
         </div>
       </section>
-    </>
+      </MainLayouts>
+    </div>
   );
 }
 

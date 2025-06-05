@@ -1,16 +1,16 @@
-
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Navbar from "./components/navbar"; // Sesuaikan path ke Navbar Anda
-import Footer from "./components/footer"; // Sesuaikan path
-import Home from "./pages/Home"; // Contoh halaman Home
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navbar from "./components/navigation/Navbar"
+import Footer from "./components/navigation/Footer"
+import Home from "./pages/Home";
 import InformasiWisata from './pages/informasiWisata';
 import Reservasi from './pages/Reservasi';
 import Galeri from './pages/Galeri';
 import Berita from './pages/Berita';
+
 function App() {
   return (
-    <BrowserRouter>
-      <Navbar />
+    <Router>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/informasi-wisata" element={<InformasiWisata />} />
@@ -20,8 +20,7 @@ function App() {
         {/* <Route path="/login" element={<LoginPage />} /> */}
         {/* <Route path="/register" element={<RegisterPage />} /> */}
       </Routes>
-      <Footer />
-    </BrowserRouter>
+    </Router>
   );
 }
 
