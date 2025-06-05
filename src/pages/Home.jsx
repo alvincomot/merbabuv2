@@ -3,7 +3,7 @@ import "aos/dist/aos.css";
 import MainLayouts from '../components/layouts/MainLayouts'
 import React, { useEffect } from "react";
 
-function Home() {
+const Home = () => {
   useEffect(() => {
     Aos.init();
   }, []);
@@ -14,7 +14,7 @@ function Home() {
         <div className="w-full">
           <div className="space-y-4 md:space-y-8">
             <img
-              src="../src/assets/home-images/top-footage.jpg"
+              src="/top-footage.png"
               className="w-full h-145 object-cover object-bottom rounded"
               alt=""
             />
@@ -59,7 +59,7 @@ function Home() {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-center md:gap-8">
             <div>
               <img
-                src="../src/assets/home-images/footage1.jpg"
+                src="../src/assets/home-images/footage1.png"
                 className="rounded"
                 alt=""
               />
@@ -100,7 +100,7 @@ function Home() {
 
             <div className="order-first md:order-none">
               <img
-                src="../src/assets/home-images/footage1.jpg"
+                src="../src/assets/home-images/footage1.png"
                 className="rounded w-full h-auto"
                 alt=""
               />
@@ -114,7 +114,7 @@ function Home() {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-center md:gap-8">
             <div>
               <img
-                src="../src/assets/home-images/footage1.jpg"
+                src="../src/assets/home-images/footage1.png"
                 className="rounded"
                 alt=""
               />

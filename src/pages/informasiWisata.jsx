@@ -3,7 +3,7 @@ import Navbar from '../components/navigation/Navbar'
 import Footer from '../components/navigation/Footer'
 import { Link } from 'react-router-dom'
 
-function InformasiWisata() {
+const InformasiWisata = () => {
   return (
     <div>
       <MainLayouts>
@@ -11,7 +11,7 @@ function InformasiWisata() {
           <section className="max-w-6xl overflow-hidden bg-gray-100 sm:grid sm:grid-cols-2 py-10 px-4 sm:px-6 lg:px-8">
             <img
               alt=""
-              src="../../src/assets/home-images/footage1.jpg"
+              src="../../src/assets/home-images/footage1.png"
               className="h-56 w-full object-cover sm:h-full"
             />
 
@@ -45,7 +45,7 @@ function InformasiWisata() {
           <section className="max-w-6xl overflow-hidden bg-gray-100 sm:grid sm:grid-cols-2 py-10 px-4 sm:px-6 lg:px-8">
             <img
               alt=""
-              src="../../src/assets/home-images/footage1.jpg"
+              src="../../src/assets/home-images/footage1.png"
               className="h-56 w-full object-cover sm:h-full"
             />
 
@@ -79,7 +79,7 @@ function InformasiWisata() {
           <section className="max-w-6xl overflow-hidden bg-gray-100 sm:grid sm:grid-cols-2 py-10 px-4 sm:px-6 lg:px-8">
             <img
               alt=""
-              src="../../src/assets/home-images/footage1.jpg"
+              src="../../src/assets/home-images/footage1.png"
               className="h-56 w-full object-cover sm:h-full"
             />
 
@@ -113,7 +113,7 @@ function InformasiWisata() {
           <section className="max-w-6xl overflow-hidden bg-gray-100 sm:grid sm:grid-cols-2 py-10 px-4 sm:px-6 lg:px-8">
             <img
               alt=""
-              src="../../src/assets/home-images/footage1.jpg"
+              src="../../src/assets/home-images/footage1.png"
               className="h-56 w-full object-cover sm:h-full"
             />
 
