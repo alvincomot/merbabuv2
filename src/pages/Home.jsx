@@ -14,13 +14,13 @@ const Home = () => {
         <div className="w-full">
           <div className="space-y-4 md:space-y-8">
             <img
-              src="/footage1.png"
+              src="/home-section/footage1.png"
               className="w-full h-145 object-cover object-bottom rounded"
               alt=""
             />
             <div data-aos="fade-up"  data-aos-duration="1300" className="absolute bottom-0 left-0 p-4 md:p-8">
               <h1 className="text-white text-3xl md:text-5xl font-bold [text-shadow:_0_2px_4px_rgb(0_0_0_/_50%)]">
-                Desa Cuntel
+                The Cuntel Village
               </h1>
               <div className="py-5">
                 <p className="text-white">Lorem ipsum dolor sit amet consectetur adipisicing elit. Est maiores reiciendis adipisci,<span className="block">quaerat nesciunt suscipit tempore labore magnam quo deserunt totam sequi molestias, neque unde repellat reprehenderit ipsum ratione debitis.</span></p>
@@ -59,7 +59,7 @@ const Home = () => {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-center md:gap-8">
             <div>
               <img
-                src="/footage1.png"
+                src="/home-section/footage1.png"
                 className="rounded"
                 alt=""
               />
@@ -100,7 +100,7 @@ const Home = () => {
 
             <div className="order-first md:order-none">
               <img
-                src="/footage1.png"
+                src="/home-section/footage1.png"
                 className="rounded w-full h-auto"
                 alt=""
               />
@@ -114,7 +114,7 @@ const Home = () => {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-center md:gap-8">
             <div>
               <img
-                src="/footage1.png"
+                src="/home-section/footage1.png"
                 className="rounded"
                 alt=""
               />
