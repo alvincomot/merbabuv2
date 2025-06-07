@@ -11,7 +11,7 @@ const InformasiWisata = () => {
           <section className="max-w-6xl overflow-hidden bg-gray-100 sm:grid sm:grid-cols-2 py-10 px-4 sm:px-6 lg:px-8">
             <img
               alt=""
-              src="/footage1.png"
+              src="/home-section/footage1.png"
               className="h-56 w-full object-cover sm:h-full"
             />
 
@@ -45,7 +45,7 @@ const InformasiWisata = () => {
           <section className="max-w-6xl overflow-hidden bg-gray-100 sm:grid sm:grid-cols-2 py-10 px-4 sm:px-6 lg:px-8">
             <img
               alt=""
-              src="/footage1.png"
+              src="/home-section/footage1.png"
               className="h-56 w-full object-cover sm:h-full"
             />
 
@@ -79,7 +79,7 @@ const InformasiWisata = () => {
           <section className="max-w-6xl overflow-hidden bg-gray-100 sm:grid sm:grid-cols-2 py-10 px-4 sm:px-6 lg:px-8">
             <img
               alt=""
-              src="/footage1.png"
+              src="/home-section/footage1.png"
               className="h-56 w-full object-cover sm:h-full"
             />
 
@@ -113,7 +113,7 @@ const InformasiWisata = () => {
           <section className="max-w-6xl overflow-hidden bg-gray-100 sm:grid sm:grid-cols-2 py-10 px-4 sm:px-6 lg:px-8">
             <img
               alt=""
-              src="/footage1.png"
+              src="/home-section/footage1.png"
               className="h-56 w-full object-cover sm:h-full"
             />
 
