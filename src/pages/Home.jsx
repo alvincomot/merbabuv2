@@ -68,7 +68,7 @@ const Home = () => {
             <div>
               <div className="max-w-lg md:max-w-none">
                 <h2 className="text-2xl font-semibold text-gray-900 sm:text-3xl">
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                  aaufa
                 </h2>
 
                 <p className="mt-4 text-gray-700">
