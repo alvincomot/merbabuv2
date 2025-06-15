@@ -1,7 +1,4 @@
 import MainLayouts from '../components/layouts/MainLayouts'
-import Navbar from '../components/navigation/Navbar'
-import Footer from '../components/navigation/Footer'
-import { Link } from 'react-router-dom'
 
 const InformasiWisata = () => {
   return (

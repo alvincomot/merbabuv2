@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const app = express();
 const port = 3000;
 const bodyParser = require("body-parser");
@@ -6,12 +7,14 @@ const mysql = require("mysql");
 const response = require("./response.cjs");
 
 app.use(bodyParser.json());
+app.use(express.json());
+
 
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "",
-  database: "db_kampus",
+  database: "db_merbabu",
 });
 
 app.get("/", (req, res) => {
@@ -27,6 +30,7 @@ app.get("/mahasiswa", (req, res) => {
 })
 
 app.post("/mahasiswa", (req, res) => {
+  if(req.file === null) return response.status(400).json({msg: "No file uploaded"})
   const { nim, nama, kelas, alamat } = req.body
   const sql = `INSERT INTO mahasiswa (nim, nama, kelas, alamat) VALUES (${nim}, '${nama}', '${kelas}', '${alamat}')`
   db.query(sql, (err, fields) => {

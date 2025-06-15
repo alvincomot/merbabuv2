@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "main": "server/api.cjs",
   "scripts": {
     "dev:frontend": "vite",
     "dev:backend": "nodemon server/api.cjs",
