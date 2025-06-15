@@ -72,7 +72,7 @@ const Home = () => {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-center md:gap-8">
               <div>
                 <img
-                  src="/home-section/footage1.png"
+                  src="/raw/view_gardupandang.png"
                   className="rounded"
                   alt=""
                 />
@@ -113,7 +113,7 @@ const Home = () => {
 
               <div className="order-first md:order-none">
                 <img
-                  src="/home-section/footage1.png"
+                  src="/raw/view_360.png"
                   className="rounded w-full h-auto"
                   alt=""
                 />
@@ -127,7 +127,7 @@ const Home = () => {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-center md:gap-8">
               <div>
                 <img
-                  src="/home-section/footage1.png"
+                  src="/raw/view_gunungsari.png"
                   className="rounded"
                   alt=""
                 />
