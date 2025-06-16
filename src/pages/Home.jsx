@@ -24,7 +24,7 @@ const Home = () => {
                 className="absolute bottom-0 left-0 p-4 md:p-8"
               >
                 <h1 className="text-white text-3xl md:text-5xl font-bold [text-shadow:_0_2px_4px_rgb(0_0_0_/_50%)]">
-                  The Cuntel Village
+                  Dusun Cuntel
                 </h1>
                 <div className="py-5">
                   <p className="text-white">
@@ -44,7 +44,7 @@ const Home = () => {
 
         <section data-aos="zoom-in" data-aos-duration="500">
           <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8">
-            <p>
+            <p className="text-semibold">
               <span className="text-3xl text-black">L</span>orem ipsum, dolor
               sit amet consectetur adipisicing elit. Libero at suscipit
               cupiditate excepturi reiciendis illo, nostrum asperiores
@@ -80,9 +80,9 @@ const Home = () => {
 
               <div>
                 <div className="max-w-lg md:max-w-none">
-                  <h2 className="text-2xl font-semibold text-gray-900 sm:text-3xl">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  </h2>
+                  <h1 className="text-3xl font-bold text-gray-900 sm:text-3xl">
+                    Experiences
+                  </h1>
 
                   <p className="mt-4 text-gray-700">
                     Lorem ipsum dolor sit amet consectetur adipisicing elit.
@@ -100,9 +100,9 @@ const Home = () => {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-center md:gap-8">
               <div className="order-last md:order-none">
                 <div className="max-w-lg md:max-w-none">
-                  <h2 className="text-2xl font-semibold text-gray-900 sm:text-3xl">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  </h2>
+                  <h1 className="text-3xl font-bold text-gray-900 sm:text-3xl">
+                    Camping dan Glamping
+                  </h1>
                   <p className="mt-4 text-gray-700">
                     Lorem ipsum dolor sit amet consectetur adipisicing elit.
                     Tenetur doloremque saepe architecto maiores repudiandae amet
@@ -135,9 +135,9 @@ const Home = () => {
 
               <div>
                 <div className="max-w-lg md:max-w-none">
-                  <h2 className="text-2xl font-semibold text-gray-900 sm:text-3xl">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  </h2>
+                  <h1 className="text-3xl font-bold text-gray-900 sm:text-3xl">
+                    Lorem
+                  </h1>
 
                   <p className="mt-4 text-gray-700">
                     Lorem ipsum dolor sit amet consectetur adipisicing elit.

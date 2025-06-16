@@ -42,7 +42,7 @@ app.post("/mahasiswa", (req, res) => {
       }
       response(200, data, "Data Added Successfully", res)
     }
- })
+  })
 })
 
 app.put("/mahasiswa", (req, res) => {
