@@ -4,7 +4,7 @@ import argon2 from "argon2";
 export const getUsers = async(req, res) => {
     try {
         const response = await User.findAll({
-            attributes: ['uuid', 'name', 'email', 'role']
+            attributes: ['uuid', 'name', 'email', 'role', 'createdAt']
         });
         res.status(200).json(response);
     } catch (error) {
@@ -28,16 +28,22 @@ export const getUserById = async(req, res) => {
 
 export const createUser = async(req, res) => {
     const {name, email, password, confirmPassword, role} = req.body;
-    if (password !== confirmPassword) return res.status(400).json({ message: "Password and Confirm Password do not match" });
+    if (password !== confirmPassword) return res.status(400).json({ message: "Password dan Konfirmasi Password tidak cocok" });
     const hashPassword = await argon2.hash(password);
     try {
-        await User.create({
+        // Simpan hasil 'create' ke dalam variabel
+        const newUser = await User.create({
             name: name,
             email: email,
             password: hashPassword,
             role: role
         });
-        res.status(201).json({ message: "User created successfully" });
+        
+        // ✅ KIRIM KEMBALI OBJEK USER YANG BARU DIBUAT
+        res.status(201).json({ 
+            message: "User berhasil dibuat",
+            user: newUser // Sertakan data user baru di dalam respons
+        });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -45,19 +51,24 @@ export const createUser = async(req, res) => {
 
 export const updateUser = async(req, res) => {
     const user = await User.findOne({
-            where: {
-                uuid: req.params.id
-            }
-        });
-    if (!user) return res.status(404).json({ message: "User not found" });
-    const {name, email, password, confirmPassword, role} = req.body;
+        where: {
+            uuid: req.params.id
+        }
+    });
+    if (!user) return res.status(404).json({ message: "User tidak ditemukan" });
+
+    const { name, email, password, confirmPassword, role } = req.body;
     let hashPassword;
-    if (password === "" || password === null) {
-        hashPassword = user.password;
-    } else {
+
+    if (password && password.length > 0) {
+        if (password !== confirmPassword) {
+            return res.status(400).json({ message: "Password dan Konfirmasi Password tidak cocok" });
+        }
         hashPassword = await argon2.hash(password);
+    } else {
+        hashPassword = user.password;
     }
-    if (password !== confirmPassword) return res.status(400).json({ message: "Password and Confirm Password do not match" });        
+    
     try {
         await User.update({
             name: name,
@@ -69,7 +80,12 @@ export const updateUser = async(req, res) => {
                 id: user.id
             }
         });
-        res.status(200).json({ message: "User updated" });
+
+        const updatedUser = await User.findByPk(user.id, {
+            attributes: ['uuid', 'name', 'email', 'role', 'createdAt', 'updatedAt']
+        });
+        
+        res.status(200).json(updatedUser);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
