@@ -32,11 +32,11 @@ const News = db.define('news', {
         allowNull: false,
         validate: { notEmpty: true }
     },
-    userId: { // Kolom untuk relasi ke tabel users
+    userId: {
         type: DataTypes.INTEGER,
         allowNull: true,
         validate: {
-            notEmpty: false // Bisa jadi null jika user dihapus
+            notEmpty: false
         }
     }
 }, {

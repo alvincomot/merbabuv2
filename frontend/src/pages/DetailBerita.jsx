@@ -1,5 +1,3 @@
-// file: frontend/src/pages/NewsDetail.jsx
-
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams, Link } from "react-router-dom";
@@ -9,32 +7,20 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 
 const formatDate = (dateString) =>
-  new Date(dateString).toLocaleDateString("id-ID", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  new Date(dateString).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
 
 const NewsDetail = () => {
   const dispatch = useDispatch();
   const { id } = useParams(); // Mengambil 'id' dari URL, contoh: /news/1
-
-  // Ambil data berita yang dipilih dari Redux store
-  const {
-    selectedItem: news,
-    status,
-    error,
-  } = useSelector((state) => state.news);
+  const { selectedItem: news, status, error } = useSelector((state) => state.news);
 
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
-    // Panggil data dari API menggunakan id dari URL
     if (id) {
       dispatch(fetchNewsById(id));
     }
   }, [id, dispatch]);
 
-  // Tampilan saat loading
   if (status === "loading") {
     return (
       <MainLayouts>
@@ -43,7 +29,6 @@ const NewsDetail = () => {
     );
   }
 
-  // Tampilan saat error
   if (status === "failed") {
     return (
       <MainLayouts>
@@ -52,7 +37,6 @@ const NewsDetail = () => {
     );
   }
 
-  // Tampilan jika berita tidak ditemukan atau belum dimuat
   if (!news) {
     return (
       <MainLayouts>
@@ -65,11 +49,7 @@ const NewsDetail = () => {
     <MainLayouts>
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div className="text-center mb-8" data-aos="fade-down">
-          {/* Link untuk kembali ke halaman daftar berita */}
-          <Link
-            to="/berita"
-            className="text-teal-600 hover:text-teal-800 font-semibold"
-          >
+          <Link to="/berita" className="text-teal-600 hover:text-teal-800 font-semibold">
             &larr; Kembali ke semua berita
           </Link>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mt-4 leading-tight">
@@ -84,22 +64,11 @@ const NewsDetail = () => {
           </p>
         </div>
 
-        {/* Gambar Utama */}
-        <div
-          className="my-8 rounded-xl overflow-hidden shadow-2xl"
-          data-aos="zoom-in"
-        >
-          <img
-            src={news.image}
-            alt={news.judul}
-            className="w-full h-auto object-cover"
-          />
+        <div className="my-8 rounded-xl overflow-hidden shadow-2xl" data-aos="zoom-in">
+          <img src={news.image} alt={news.judul} className="w-full h-auto object-cover"/>
         </div>
 
-        {/* Konten Berita */}
-        <div
-          className="prose prose-lg max-w-none text-gray-800 leading-relaxed whitespace-pre-wrap"
-          data-aos="fade-up"
+        <div className="prose prose-lg max-w-none text-gray-800 leading-relaxed whitespace-pre-wrap" data-aos="fade-up"
           dangerouslySetInnerHTML={{
             __html: news.konten.replace(/\n/g, "<br />"),
           }}

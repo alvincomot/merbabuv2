@@ -5,11 +5,8 @@ import upload from '../middleware/UploadMiddleware.js';
 
 const router = express.Router();
 
-// Route Publik
 router.get('/news', getNews);
 router.get('/news/:id', getNewsById);
-
-// Route Khusus Admin
 router.post('/news', verifyUser, adminOnly, upload.single('image'), createNews);
 router.patch('/news/:id', verifyUser, adminOnly, upload.single('image'), updateNews);
 router.delete('/news/:id', verifyUser, adminOnly, deleteNews);

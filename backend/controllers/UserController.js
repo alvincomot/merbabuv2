@@ -31,7 +31,6 @@ export const createUser = async(req, res) => {
     if (password !== confirmPassword) return res.status(400).json({ message: "Password dan Konfirmasi Password tidak cocok" });
     const hashPassword = await argon2.hash(password);
     try {
-        // Simpan hasil 'create' ke dalam variabel
         const newUser = await User.create({
             name: name,
             email: email,
@@ -39,10 +38,9 @@ export const createUser = async(req, res) => {
             role: role
         });
         
-        // ✅ KIRIM KEMBALI OBJEK USER YANG BARU DIBUAT
         res.status(201).json({ 
             message: "User berhasil dibuat",
-            user: newUser // Sertakan data user baru di dalam respons
+            user: newUser
         });
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -51,8 +49,8 @@ export const createUser = async(req, res) => {
 
 export const updateUser = async(req, res) => {
     const user = await User.findOne({
-        where: {
-            uuid: req.params.id
+      where: {
+          uuid: req.params.id
         }
     });
     if (!user) return res.status(404).json({ message: "User tidak ditemukan" });
@@ -77,7 +75,7 @@ export const updateUser = async(req, res) => {
             role: role
         },{
             where: {
-                id: user.id
+              id: user.id
             }
         });
 

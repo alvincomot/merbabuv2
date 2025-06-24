@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import session from "express-session";
 import dotenv from "dotenv";
-import path from "path"; // PASTIKAN 'path' DI-IMPOR
+import path from "path";
 import { fileURLToPath } from "url";
 import db from "./config/Database.js";
 import SequelizeStore from "connect-session-sequelize";
@@ -49,7 +49,6 @@ app.use(
 );
 
 app.use(express.static(path.join(__dirname, 'public')));
-// app.use(express.json());
 app.use(UserRoute);
 app.use(DestinationsRoute);
 app.use(AuthRoute);

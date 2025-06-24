@@ -13,16 +13,8 @@ const Home = () => {
         <section id="home">
           <div className="relative w-full">
             <div className="space-y-4 md:space-y-8">
-              <img
-                src="/raw/main.png"
-                className="w-full h-145 object-cover object-bottom rounded"
-                alt=""
-              />
-              <div
-                data-aos="fade-up"
-                data-aos-duration="1300"
-                className="absolute bottom-0 left-0 p-4 md:p-8"
-              >
+              <img src="/raw/main.png" className="w-full h-145 object-cover object-bottom rounded" alt=""/>
+              <div data-aos="fade-up" data-aos-duration="1300" className="absolute bottom-0 left-0 p-4 md:p-8">
                 <h1 className="text-white text-3xl md:text-5xl font-bold [text-shadow:_0_2px_4px_rgb(0_0_0_/_50%)]">
                   Dusun Cuntel
                 </h1>
@@ -69,11 +61,7 @@ const Home = () => {
           <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-center md:gap-8">
               <div>
-                <img
-                  src="/raw/view_gardupandang.png"
-                  className="rounded"
-                  alt=""
-                />
+                <img src="/raw/view_gardupandang.png" className="rounded" alt=""/>
               </div>
 
               <div>
@@ -114,11 +102,7 @@ const Home = () => {
               </div>
 
               <div className="order-first md:order-none">
-                <img
-                  src="/raw/view_360.png"
-                  className="rounded w-full h-auto"
-                  alt=""
-                />
+                <img src="/raw/view_360.png" className="rounded w-full h-auto" alt=""/>
               </div>
             </div>
           </div>
@@ -128,11 +112,7 @@ const Home = () => {
           <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-center md:gap-8">
               <div>
-                <img
-                  src="/raw/view_gunungsari.png"
-                  className="rounded"
-                  alt=""
-                />
+                <img src="/raw/view_gunungsari.png" className="rounded" alt=""/>
               </div>
 
               <div>

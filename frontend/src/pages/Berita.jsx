@@ -1,5 +1,3 @@
-// file: frontend/src/pages/News.jsx
-
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
@@ -10,11 +8,7 @@ import "aos/dist/aos.css";
 
 // Fungsi helper untuk memformat tanggal
 const formatDate = (dateString) =>
-  new Date(dateString).toLocaleDateString("id-ID", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  new Date(dateString).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric"});
 
 const News = () => {
   const dispatch = useDispatch();
@@ -27,26 +21,21 @@ const News = () => {
 
   // Memisahkan artikel pertama dengan sisanya
   const firstArticle = allNews?.[0];
-  const otherArticles = allNews?.slice(1); // Mengambil semua sisa artikel
+  const otherArticles = allNews?.slice(1);
 
   return (
     <MainLayouts>
       <section className="bg-gray-50 py-16">
         <div className="mx-auto max-w-screen-lg px-4 sm:px-6 lg:px-8">
-          {/* Artikel Utama / Paling Atas */}
+          {/* artikel Utama / paling Atas */}
           {status === "succeeded" && firstArticle && (
             <div className="mb-12" data-aos="fade-down">
               <Link to={`/news/${firstArticle.id}`} className="block group">
                 <div className="relative overflow-hidden rounded-xl shadow-lg">
-                  <img
-                    src={firstArticle.image}
-                    alt={firstArticle.judul}
-                    className="w-full h-auto md:h-96 object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
+                  <img src={firstArticle.image} alt={firstArticle.judul} className="w-full h-auto md:h-96 object-cover transition-transform duration-500 group-hover:scale-105"/>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 </div>
                 <div className="p-6">
-                  {/* ✅ BAGIAN YANG DIPERBAIKI */}
                   <h2 className="text-2xl md:text-3xl font-bold text-gray-900 group-hover:text-teal-600 transition-colors duration-300">
                     {firstArticle.judul}
                   </h2>
@@ -62,30 +51,18 @@ const News = () => {
             </div>
           )}
 
-          {/* Pembatas */}
           {status === "succeeded" && firstArticle && (
             <hr className="my-12 border-gray-200" />
           )}
 
-          {/* Daftar Artikel Lainnya */}
+          {/* artikel Lainnya */}
           <div className="space-y-10">
             {status === "succeeded" &&
               otherArticles?.map((article, index) => (
-                <div
-                  key={article.id}
-                  data-aos="fade-up"
-                  data-aos-delay={index * 100}
-                >
-                  <Link
-                    to={`/news/${article.id}`}
-                    className="flex flex-col sm:flex-row gap-6 group"
-                  >
+                <div key={article.id} data-aos="fade-up" data-aos-delay={index * 100}>
+                  <Link to={`/news/${article.id}`} className="flex flex-col sm:flex-row gap-6 group">
                     <div className="w-full sm:w-1/3 lg:w-1/4 h-48 sm:h-auto overflow-hidden rounded-lg">
-                      <img
-                        src={article.image}
-                        alt={article.judul}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
+                      <img src={article.image} alt={article.judul} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"/>
                     </div>
                     <div className="mt-4 sm:mt-0 sm:w-2/3 lg:w-3/4">
                       <h3 className="text-xl font-bold text-gray-800 group-hover:text-teal-600 transition-colors">
@@ -103,18 +80,6 @@ const News = () => {
                 </div>
               ))}
           </div>
-
-          {/* Tombol Lihat Selengkapnya (jika ada lebih dari 4 berita) */}
-          {status === "succeeded" && allNews.length > 4 && (
-            <div className="text-center mt-12">
-              <Link
-                to="/news/archive"
-                className="inline-block bg-teal-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-teal-700 transition-colors shadow-md hover:shadow-lg"
-              >
-                Lihat Semua Berita
-              </Link>
-            </div>
-          )}
 
           {/* Status Loading dan Error */}
           {status === "loading" && (

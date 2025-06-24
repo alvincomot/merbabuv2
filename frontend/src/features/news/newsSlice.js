@@ -4,7 +4,9 @@ import api from '@/api/axios';
 const API_URL = "http://localhost:3000/news"; // Kita bisa gunakan path relatif jika baseURL sudah diatur di api/axios.js
 
 // Thunks untuk operasi CRUD User
-export const fetchNews = createAsyncThunk("news/fetchNews", async () => {
+export const fetchNews = createAsyncThunk(
+  "news/fetchNews", 
+  async () => {
     const response = await api.get(API_URL);
     return response.data;
 });
@@ -82,7 +84,6 @@ const newsSlice = createSlice({
             .addCase(updateNews.pending, (state) => { state.formStatus = "loading"; })
             .addCase(updateNews.fulfilled, (state, action) => {
                 state.formStatus = "succeeded";
-                // ✅ Diubah dari uuid menjadi id
                 const index = state.items.findIndex(item => item.id === action.payload.news.id);
                 if (index !== -1) {
                     state.items[index] = action.payload.news;
@@ -92,9 +93,7 @@ const newsSlice = createSlice({
                 state.formStatus = "failed";
                 state.error = action.payload?.message || "Gagal mengupdate berita.";
             })
-            // Kasus untuk Delete
             .addCase(deleteNews.fulfilled, (state, action) => {
-                // ✅ Diubah dari uuid menjadi id
                 state.items = state.items.filter(item => item.id !== action.payload);
             })
             
@@ -103,7 +102,7 @@ const newsSlice = createSlice({
             })
             .addCase(fetchNewsById.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.selectedItem = action.payload; // Simpan berita yang dipilih
+                state.selectedItem = action.payload;
             })
             .addCase(fetchNewsById.rejected, (state, action) => {
                 state.status = 'failed';

@@ -1,5 +1,3 @@
-// file: backend/controllers/ReservasiController.js
-
 import LayananReservasi from "../models/ReservasiModel.js";
 import path from 'path';
 import fs from 'fs';
@@ -78,7 +76,6 @@ export const updateLayananReservasi = async (req, res) => {
     }
 };
 
-// ✅ DELETE layanan reservasi (Admin)
 export const deleteLayananReservasi = async (req, res) => {
     try {
         const layanan = await LayananReservasi.findByPk(req.params.id);

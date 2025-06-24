@@ -22,12 +22,7 @@ const SkeletonCard = () => (
 
 const InformasiWisata = () => {
   const dispatch = useDispatch();
-  const {
-    items: destinations,
-    status,
-    error,
-  } = useSelector((state) => state.destinations);
-
+  const { items: destinations, status, error } = useSelector((state) => state.destinations);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedWisata, setSelectedWisata] = useState(null);
 
@@ -79,35 +74,17 @@ const InformasiWisata = () => {
             Array.isArray(destinations) &&
             destinations.length > 0
               ? destinations.map((dest, index) => (
-                  <div
-                    key={dest.uuid}
-                    className="flex flex-col rounded-xl overflow-hidden bg-white border border-gray-100 shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-2"
-                    data-aos="fade-up"
-                    data-aos-delay={index * 100}
-                  >
+                  <div key={dest.uuid} className="flex flex-col rounded-xl overflow-hidden bg-white border border-gray-100 shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-2" data-aos="fade-up" data-aos-delay={index * 100}>
                     <div className="relative overflow-hidden">
-                      <img
-                        alt={dest.name}
-                        src={dest.image}
-                        className="h-56 w-full object-cover"
-                      />
+                      <img alt={dest.name} src={dest.image} className="h-56 w-full object-cover"/>
                     </div>
                     <div className="p-5 flex flex-col flex-grow">
                       <h3 className="text-xl font-bold text-gray-900">
                         {dest.name || "Nama Wisata Tidak Tersedia"}
                       </h3>
                       <div className="mt-2 flex items-center text-sm text-gray-500">
-                        <svg
-                          className="w-4 h-4 mr-1.5"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                            clipRule="evenodd"
-                          ></path>
+                        <svg className="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                          <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"></path>
                         </svg>
                         <span>{dest.location || "Lokasi tidak tersedia"}</span>
                       </div>
@@ -115,10 +92,7 @@ const InformasiWisata = () => {
                         {dest.description || "Deskripsi tidak tersedia."}
                       </p>
                       <div className="mt-auto pt-4">
-                        <button
-                          onClick={() => openModal(dest)}
-                          className="inline-block rounded-full bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition-colors duration-300 hover:bg-teal-700"
-                        >
+                        <button onClick={() => openModal(dest)} className="inline-block rounded-full bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition-colors duration-300 hover:bg-teal-700">
                           Lihat Detail
                         </button>
                       </div>
@@ -135,30 +109,15 @@ const InformasiWisata = () => {
       </section>
 
       {isModalOpen && selectedWisata && (
-        <div
-          onClick={closeModal}
-          className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-[100] p-4"
-          data-aos="fade"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col"
-            data-aos="zoom-in"
-          >
-            <img
-              src={selectedWisata.image}
-              alt={selectedWisata.name}
-              className="w-full h-64 object-cover rounded-t-lg"
-            />
+        <div onClick={closeModal} className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-[100] p-4" data-aos="fade">
+          <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col" data-aos="zoom-in">
+            <img src={selectedWisata.image} alt={selectedWisata.name} className="w-full h-64 object-cover rounded-t-lg"/>
             <div className="p-6 sm:p-8 flex-grow overflow-y-auto">
               <div className="flex justify-between items-start">
                 <h2 className="text-3xl font-bold text-gray-900">
                   {selectedWisata.name}
                 </h2>
-                <button
-                  onClick={closeModal}
-                  className="text-3xl font-bold text-gray-400 hover:text-gray-700 -mt-4 -mr-2"
-                >
+                <button onClick={closeModal} className="text-3xl font-bold text-gray-400 hover:text-gray-700 -mt-4 -mr-2">
                   &times;
                 </button>
               </div>

@@ -2,6 +2,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from '@/api/axios'; // Menggunakan instance axios terpusat
 
+const API_URL = "http://localhost:3000/users";
+
 // Thunks untuk operasi CRUD User
 export const fetchUsers = createAsyncThunk("users/fetchUsers", async () => {
     const response = await api.get("/users");
