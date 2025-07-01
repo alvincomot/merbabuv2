@@ -8,7 +8,7 @@ import Reservasi from './pages/Reservasi';
 import Galeri from './pages/Galeri';
 import Berita from './pages/Berita';
 import NewsDetail from './pages/DetailBerita';
-import Dashboard from './pages/dashboard';
+import Dashboard from './pages/Dashboard';
 import Register from './pages/auth/Register';
 import Login from './pages/auth/Login';
 import { getMe } from './features/auth/authSlice';
