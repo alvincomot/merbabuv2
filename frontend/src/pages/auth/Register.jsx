@@ -81,8 +81,9 @@ const Register = () => {
                                 {formStatus === 'loading' ? 'Registering...' : 'Sign Up'}
                             </button>
                             <div className="mt-6 text-center ">
+                              Already have an account?
                                 <Link to="/login" className="text-sm text-teal-600 hover:underline">
-                                    Already have an account? Sign In
+                                  Sign In
                                 </Link>
                             </div>
                         </div>

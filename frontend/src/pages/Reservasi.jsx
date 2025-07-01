@@ -26,9 +26,8 @@ const Reservasi = () => {
         <MainLayouts>
             <section className="bg-white py-16">
                 <div className="mx-auto max-w-screen-lg px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-12" data-aos="fade-down">
-                        <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl">Layanan & Reservasi</h1>
-                        <p className="mt-4 max-w-xl mx-auto text-gray-600">Pilih layanan yang Anda inginkan dan hubungi kami untuk melakukan pemesanan.</p>
+                    <div className="text-start mb-12" data-aos="fade-down">
+                        <h1 className="text-2xl font-bold text-gray-900 sm:text-5xl">Layanan & Reservasi</h1>
                     </div>
 
                     <div className="space-y-8">

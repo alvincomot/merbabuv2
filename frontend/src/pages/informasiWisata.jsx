@@ -47,15 +47,6 @@ const InformasiWisata = () => {
     <MainLayouts>
       <section className="bg-gray-50">
         <div className="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8">
-          <div className="text-center mb-12" data-aos="fade-down">
-            <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl">
-              Jelajahi Destinasi Wisata Kami
-            </h1>
-            <p className="mt-4 max-w-xl mx-auto text-gray-600">
-              Temukan keindahan dan keunikan di setiap sudut desa kami yang
-              menawan.
-            </p>
-          </div>
 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {(status === "loading" || status === "idle") &&
