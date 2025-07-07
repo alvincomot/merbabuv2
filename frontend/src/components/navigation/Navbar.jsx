@@ -26,7 +26,6 @@ function Navbar() {
     { to: "/", text: "Home" },
     { to: "/informasi-wisata", text: "Informasi Wisata" },
     { to: "/reservasi", text: "Reservasi" },
-    { to: "/galeri", text: "Galeri" },
     { to: "/berita", text: "Berita" },
   ];
 
@@ -38,7 +37,6 @@ function Navbar() {
           <div className="flex-1 md:flex md:items-center md:gap-12">
             <Link className="block text-teal-600" to="/">
               <span className="sr-only">Home</span>
-              {/* SVG Logo Anda */}
               <svg
                 className="h-8"
                 viewBox="0 0 28 24"

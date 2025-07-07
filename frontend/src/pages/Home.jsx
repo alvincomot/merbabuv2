@@ -88,7 +88,7 @@ const Home = () => {
                     Camping dan Glamping
                   </h1>
                   <p className="mt-4 text-gray-700">
-                    Dusun Cuntel juga menjadi cerminan nyata dari pluralisme sosial budaya yang harmonis. Kehidupan bermasyarakat di sini ditandai dengan keberadaan berbagai tempat ibadah seperti Gereja Kristen Jawa Tengah Utara (GKJTU), Gereja Bethel, Gereja Pantekosta di Indonesia (GPDI), berdampingan dengan Masjid Baiturrahman, menunjukkan toleransi dan kerukunan antarumat beragama yang kuat.
+                    Di samping kekayaan budaya dan kerukunan sosialnya, Dusun Cuntel juga menawarkan pengalaman menginap yang tak terlupakan dengan beragam pilihan camping dan glamping. Para pengunjung dapat memilih untuk mendirikan tenda sendiri di area camping ground yang telah disediakan, atau menikmati kenyamanan glamping dengan fasilitas lengkap layaknya hotel, namun tetap dekat dengan alam. Pilihan akomodasi ini memberikan kesempatan bagi setiap wisatawan untuk merasakan sensasi bermalam di lereng Merbabu yang sejuk, ditemani gemerlap bintang dan panorama pegunungan yang menawan, menjadikan kunjungan ke Dusun Cuntel semakin berkesan.
                   </p>
                 </div>
               </div>
@@ -104,21 +104,40 @@ const Home = () => {
           <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-center md:gap-8">
               <div>
-                <img src="/view_merbabupark.JPG" className="rounded" alt=""/>
+                <img src="/armagedon.jpg" className="rounded" alt=""/>
               </div>
 
               <div>
                 <div className="max-w-lg md:max-w-none">
                   <h1 className="text-3xl font-bold text-gray-900 sm:text-3xl">
-                    Lorem
+                    Pluralisme
                   </h1>
 
                   <p className="mt-4 text-gray-700">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Tenetur doloremque saepe architecto maiores repudiandae amet
-                    perferendis repellendus, reprehenderit voluptas sequi.
+                    Dusun Cuntel juga menjadi cerminan nyata dari pluralisme sosial budaya yang harmonis. Kehidupan bermasyarakat di sini ditandai dengan keberadaan berbagai tempat ibadah seperti Gereja Kristen Jawa Tengah Utara (GKJTU), Gereja Bethel, Gereja Pantekosta di Indonesia (GPDI), berdampingan dengan Masjid Baiturrahman, menunjukkan toleransi dan kerukunan antarumat beragama yang kuat.
                   </p>
                 </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section data-aos="fade-right" data-aos-duration="1300">
+          <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-center md:gap-8">
+              <div className="order-last md:order-none">
+                <div className="max-w-lg md:max-w-none">
+                  <h1 className="text-3xl font-bold text-gray-900 sm:text-3xl">
+                    Kehidupan dan Sosial
+                  </h1>
+                  <p className="mt-4 text-gray-700">
+                    Kekayaan budaya lokal diwujudkan dalam berbagai kegiatan adat, salah satunya adalah Merti Dusun yang rutin diperingati setiap bulan Sapar dalam kalender Jawa, atau yang terakhir jatuh pada tanggal 13 Agustus Rabu Pahing, dimeriahkan dengan pagelaran wayang kulit semalam suntuk. Selain itu, Dusun Cuntel juga sering menjadi lokasi kegiatan live-in untuk merasakan kehidupan pedesaan langsung, didukung dengan ketersediaan sekitar 20 rumah untuk homestay yang siap menyambut para tamu.
+                  </p>
+                </div>
+              </div>
+
+              <div className="order-first md:order-none">
+                <img src="/view_merbabupark.JPG" className="rounded w-full h-auto" alt=""/>
               </div>
             </div>
           </div>
