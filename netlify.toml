@@ -1,0 +1,12 @@
+# File: netlify.toml
+# Lokasi: di folder root proyek Anda
+
+[build]
+  # Perintah untuk menjalankan proses build
+  command = "npm run build"
+
+  # Folder hasil build (relatif terhadap Base directory)
+  publish = "dist"
+
+  # Folder dasar tempat proyek frontend Anda berada
+  base = "frontend"
