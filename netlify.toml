@@ -3,7 +3,7 @@
 
 [build]
   # Perintah untuk menjalankan proses build
-  command = "npm run build"
+  command = "npm run build && (cd ../backend && npm run migrate)"
 
   # Folder hasil build (relatif terhadap Base directory)
   publish = "dist"
