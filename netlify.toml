@@ -1,8 +1,4 @@
-# File: netlify.toml
-
 [build]
-  # Pastikan command Anda persis seperti ini, dengan "npm install" untuk backend
-  command = "npm run build && (cd ../backend && npm install && npm run migrate)"
-  
-  publish = "dist"
-  base = "frontend"
+  base = ""
+  command = "npm install && cd frontend && npm run build && cd ../backend && npm run migrate"
+  publish = "frontend/dist"
