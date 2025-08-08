@@ -38,7 +38,3 @@ Thumbs.db
 # Jika Anda tidak ingin melacak gambar yang diunggah oleh pengguna di Git,
 # hapus tanda pagar dari baris di bawah ini.
 # /backend/public/images
-
-# Abaikan file lock dari backend dan frontend
-backend/package-lock.json
-frontend/package-lock.json
