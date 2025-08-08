@@ -1,12 +1,8 @@
 # File: netlify.toml
-# Lokasi: di folder root proyek Anda
 
 [build]
-  # Perintah untuk menjalankan proses build
-  command = "npm run build && (cd ../backend && npm install && npm run migrate)"
-
-  # Folder hasil build (relatif terhadap Base directory)
+  # Pastikan command Anda persis seperti ini, dengan "npm install" untuk backend
+  command = "npm run build && (cd ../backend && npm run migrate)"
+  
   publish = "dist"
-
-  # Folder dasar tempat proyek frontend Anda berada
   base = "frontend"
