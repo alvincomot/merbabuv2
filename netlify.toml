@@ -1,4 +1,8 @@
 [build]
   base = ""
-  command = "npm install && cd frontend && npm run build && cd ../backend && npm run migrate"
+  command = "npm run deploy"
   publish = "frontend/dist"
+
+[build.environment]
+  NODE_VERSION = "22.18.0"
+  NPM_FLAGS = "--legacy-peer-deps"
