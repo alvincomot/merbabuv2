@@ -1,24 +1,24 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from '@/api/axios';
 
-const API_URL = "http://localhost:3000/news"; // Kita bisa gunakan path relatif jika baseURL sudah diatur di api/axios.js
-
-// Thunks untuk operasi CRUD User
 export const fetchNews = createAsyncThunk(
   "news/fetchNews", 
   async () => {
-    const response = await api.get(API_URL);
+    // Perbaikan: Gunakan path relatif
+    const response = await api.get("/news");
     return response.data;
 });
 
 export const fetchNewsById = createAsyncThunk("news/fetchNewsById", async (id) => {
-    const response = await api.get(`http://localhost:3000/news/${id}`);
+    // Perbaikan: Gunakan path relatif
+    const response = await api.get(`/news/${id}`);
     return response.data;
 });
 
 export const createNews = createAsyncThunk("news/createNews", async (formData, { rejectWithValue }) => {
     try {
-        const response = await api.post(API_URL, formData);
+        // Perbaikan: Gunakan path relatif
+        const response = await api.post("/news", formData);
         return response.data;
     } catch (error) {
         return rejectWithValue(error.response.data);
@@ -27,7 +27,8 @@ export const createNews = createAsyncThunk("news/createNews", async (formData, {
 
 export const updateNews = createAsyncThunk("news/updateNews", async ({ id, formData }, { rejectWithValue }) => {
     try {
-        const response = await api.patch(`${API_URL}/${id}`, formData);
+        // Perbaikan: Gunakan path relatif
+        const response = await api.patch(`/news/${id}`, formData);
         return response.data;
     } catch (error) {
         return rejectWithValue(error.response.data);
@@ -36,7 +37,8 @@ export const updateNews = createAsyncThunk("news/updateNews", async ({ id, formD
 
 export const deleteNews = createAsyncThunk("news/deleteNews", async (id, { rejectWithValue }) => {
     try {
-        await api.delete(`${API_URL}/${id}`);
+        // Perbaikan: Gunakan path relatif
+        await api.delete(`/news/${id}`);
         return id;
     } catch (error) {
         return rejectWithValue(error.response.data);
