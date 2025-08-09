@@ -8,6 +8,18 @@ export const getDestinations = async (req, res) => {
     const response = await Destinations.findAll({
       attributes: ["uuid", "name", "description", "image", "location"],
     });
+    
+    const destinationsWithUrls = response.map(dest => {
+      const imageUrl = `${process.env.BACKEND_URL}/images/${dest.image}`;
+      return {
+        uuid: dest.uuid,
+        name: dest.name,
+        description: dest.description,
+        location: dest.location,
+        image: imageUrl, // Kirim URL lengkap, bukan hanya nama file
+      };
+    });
+
     res.status(200).json(response);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -47,13 +59,12 @@ export const createDestinations = async (req, res) => {
       .json({ message: "Tidak ada file gambar yang diunggah." });
   }
   const fileName = req.file.filename;
-  const imageUrl = `${req.protocol}://${req.get("host")}/images/${fileName}`;
 
   try {
     const newDestination = await Destinations.create({
       name: name,
       description: description,
-      image: imageUrl,
+      image: fileName,
       location: location,
     });
 
@@ -75,6 +86,7 @@ export const updateDestinations = async (req, res) => {
       return res.status(404).json({ message: "Data tidak ditemukan" });
 
     let imageUrl = destination.image;
+
     if (req.file) {
       console.log("Gambar baru terdeteksi. Mengganti file gambar...");
 
@@ -97,7 +109,6 @@ export const updateDestinations = async (req, res) => {
 
       // generate url baru untuk gambar yang diupload
       const newFileName = req.file.filename;
-      imageUrl = `${req.protocol}://${req.get("host")}/images/${newFileName}`;
     }
 
     const { name, description, location } = req.body;
@@ -105,7 +116,7 @@ export const updateDestinations = async (req, res) => {
       name: name,
       description: description,
       location: location,
-      image: imageUrl,
+      image: newFileName,
     });
 
     res.status(200).json({
