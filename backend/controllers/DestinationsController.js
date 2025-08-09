@@ -8,7 +8,7 @@ export const getDestinations = async (req, res) => {
     const response = await Destinations.findAll({
       attributes: ["uuid", "name", "description", "image", "location"],
     });
-    
+
     const destinationsWithUrls = response.map(dest => {
       const imageUrl = `${process.env.BACKEND_URL}/images/${dest.image}`;
       return {
@@ -16,7 +16,7 @@ export const getDestinations = async (req, res) => {
         name: dest.name,
         description: dest.description,
         location: dest.location,
-        image: imageUrl, // Kirim URL lengkap, bukan hanya nama file
+        image: imageUrl,
       };
     });
 
