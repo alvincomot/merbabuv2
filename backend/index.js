@@ -29,12 +29,20 @@ const __dirname = path.dirname(__filename);
 //     await db.sync();
 // })();
 
-app.use(
-  cors({
-    credentials: true,
-    origin: "http://localhost:5173",
-  })
-);
+const allowedOrigins = [
+  'http://localhost:5173',                      // Untuk development lokal
+  'https://merbabuv2.vercel.app'                 // Untuk production di Vercel
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+};
 
 app.use(
   session({
@@ -48,6 +56,7 @@ app.use(
   })
 );
 
+app.use(cors(corsOptions));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(UserRoute);
 app.use(DestinationsRoute);
