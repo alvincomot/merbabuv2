@@ -1,12 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from '@/api/axios.js';
 
-const API_URL = "http://localhost:3000/destinations";
-
 export const fetchDestinations = createAsyncThunk(
   "destinations/fetchDestinations",
   async () => {
-    const response = await api.get(API_URL);
+    const response = await api.get("/destinations");
     return response.data;
   }
 );
@@ -16,7 +14,7 @@ export const createDestination = createAsyncThunk(
   "destinations/createDestinations",
   async (formData, { rejectWithValue }) => {
     try {
-      const response = await api.post(API_URL, formData, {
+      const response = await api.post("/destinations", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       return response.data;
@@ -31,7 +29,7 @@ export const updateDestination = createAsyncThunk(
   "destinations/updateDestination",
   async ({ id, formData }, { rejectWithValue }) => {
     try {
-      const response = await api.patch(`${API_URL}/${id}`, formData, {
+      const response = await api.patch(`${"/destinations"}/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       return response.data;
@@ -46,7 +44,7 @@ export const deleteDestination = createAsyncThunk(
   "destinations/deleteDestination",
   async (id, { rejectWithValue }) => {
     try {
-      await api.delete(`${API_URL}/${id}`);
+      await api.delete(`${"/destinations"}/${id}`);
       // Kembalikan ID agar kita tahu item mana yang harus dihapus dari state
       return id;
     } catch (error) {

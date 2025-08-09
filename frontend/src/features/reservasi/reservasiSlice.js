@@ -1,15 +1,13 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from '@/api/axios'; // Menggunakan instance axios terpusat Anda
 
-const API_URL = "http://localhost:3000/reservasi"; 
-
 // === ASYNC THUNKS UNTUK SEMUA OPERASI CRUD ===
 
 // 1. Mengambil semua data layanan reservasi
 export const fetchReservasi = createAsyncThunk(
     "reservasi/fetchReservasi", 
     async () => {
-        const response = await api.get(API_URL);
+        const response = await api.get("/reservasi");
         return response.data;
     }
 );
@@ -19,7 +17,7 @@ export const createReservasi = createAsyncThunk(
     "reservasi/createReservasi", 
     async (formData, { rejectWithValue }) => {
         try {
-            const response = await api.post(API_URL, formData);
+            const response = await api.post("/reservasi", formData);
             return response.data; // Harapannya backend mengembalikan { message: "...", layanan: {...} }
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -32,7 +30,7 @@ export const updateReservasi = createAsyncThunk(
     "reservasi/updateReservasi", 
     async ({ id, formData }, { rejectWithValue }) => {
         try {
-            const response = await api.patch(`${API_URL}/${id}`, formData);
+            const response = await api.patch(`/reservasi/${id}`, formData);
             return response.data; // Harapannya backend mengembalikan data yang diupdate
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -45,7 +43,7 @@ export const deleteReservasi = createAsyncThunk(
     "reservasi/deleteReservasi", 
     async (id, { rejectWithValue }) => {
         try {
-            await api.delete(`${API_URL}/${id}`);
+            await api.delete(`"/reservasi"/${id}`);
             return id; // Kembalikan ID agar reducer tahu item mana yang harus dihapus
         } catch (error) {
             return rejectWithValue(error.response.data);

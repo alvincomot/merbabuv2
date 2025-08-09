@@ -12,10 +12,8 @@ export const registerUser = createAsyncThunk(
   "auth/registerUser",
   async (userData, { rejectWithValue }) => {
     try {
-      const response = await api.post(
-        "http://localhost:3000/register",
-        userData
-      );
+      // Perbaikan: Gunakan path relatif
+      const response = await api.post("/register", userData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -27,10 +25,8 @@ export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await api.post(
-        "http://localhost:3000/login",
-        credentials
-      );
+      // Perbaikan: Gunakan path relatif
+      const response = await api.post("/login", credentials);
       return response.data;
     } catch (error) {
       if (error.response && error.response.data.message) {
@@ -43,7 +39,8 @@ export const loginUser = createAsyncThunk(
 );
 
 export const logoutUser = createAsyncThunk("auth/logoutUser", async () => {
-  await api.delete("http://localhost:3000/logout");
+  // Perbaikan: Gunakan path relatif
+  await api.delete("/logout");
 });
 
 export const getMe = createAsyncThunk(
