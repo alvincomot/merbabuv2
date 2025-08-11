@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Model untuk tabel 'users'
+model User {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique
+  name      String
+  email     String   @unique
+  password  String
+  role      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  news      News[] // Relasi: satu User bisa memiliki banyak News
+}
+
+// Model untuk tabel 'destination'
+model Destination {
+  id          Int      @id @default(autoincrement())
+  uuid        String   @unique
+  name        String
+  description String   @db.Text
+  image       String
+  location    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Model untuk tabel 'news'
+model News {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique
+  judul     String
+  konten    String   @db.Text
+  image     String
+  userId    Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User?    @relation(fields: [userId], references: [id]) // Relasi: satu News dimiliki oleh satu User
+}
+
+// Model untuk tabel 'reservasi'
+model Reservasi {
+  id                Int      @id @default(autoincrement())
+  judul             String
+  deskripsi_singkat String
+  image             String
+  nomor_whatsapp    String
+  pesan_whatsapp    String   @db.Text
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// Model untuk tabel 'sessions'
+model Session {
+  sid       String   @id @db.VarChar(36)
+  expires   DateTime?
+  data      String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
