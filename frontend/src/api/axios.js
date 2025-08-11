@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: "https://merbabu-backend.up.railway.app/api", 
+  baseURL: "https://merbabu-backend.up.railway.app/api",
   withCredentials: true
 });
 
