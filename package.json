@@ -11,14 +11,24 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@prisma/client": "^6.13.0",
     "@reduxjs/toolkit": "^2.8.2",
     "aos": "^2.3.4",
+    "argon2": "^0.43.0",
     "axios": "^1.10.0",
+    "connect-session-sequelize": "^8.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "multer": "^2.0.1",
+    "mysql2": "^3.14.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",
     "react-redux": "^9.2.0",
-    "react-router-dom": "^7.6.1"
+    "react-router-dom": "^7.6.1",
+    "sequelize": "^6.37.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
@@ -35,6 +45,7 @@
     "nodemon": "^3.1.10",
     "postcss": "^8.5.4",
     "prettier": "^3.5.3",
+    "prisma": "^6.13.0",
     "tailwindcss": "^4.1.8",
     "vite": "^6.3.5"
   }

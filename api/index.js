@@ -1,7 +1,6 @@
 // api/index.js (Vercel Serverless entry point)
 import express from "express";
 import cors from "cors";
-import session from "express-session";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -34,18 +33,6 @@ app.use(cors({
   },
   credentials: true
 }));
-
-// Session setup
-app.use(
-  session({
-    secret: process.env.SESS_SECRET,
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-      secure: process.env.NODE_ENV === "production",
-    }
-  })
-);
 
 // Static files (jika perlu)
 app.use(express.static(path.join(__dirname, "public")));
