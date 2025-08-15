@@ -8,8 +8,8 @@ export const getDestinations = async (req, res) => {
     const response = await Destinations.findAll({
       attributes: ["uuid", "name", "description", "image", "location"],
     });
-    
-    const destinationsWithUrls = response.map(dest => {
+
+    const destinationsWithUrls = response.map((dest) => {
       const imageUrl = `${process.env.BACKEND_URL}/images/${dest.image}`;
       return {
         uuid: dest.uuid,
@@ -86,7 +86,6 @@ export const updateDestinations = async (req, res) => {
       return res.status(404).json({ message: "Data tidak ditemukan" });
 
     let imageUrl = destination.image;
-
     if (req.file) {
       console.log("Gambar baru terdeteksi. Mengganti file gambar...");
 
@@ -146,12 +145,12 @@ export const deleteDestinations = async (req, res) => {
     if (req.role === "admin") {
       if (destination.image) {
         const imageName = path.basename(destination.image);
-        const imagePath = path.join('public/images', imageName);
+        const imagePath = path.join("public/images", imageName);
         try {
           await fs.unlink(imagePath);
           console.log(`Gambar berhasil dihapus: ${imageName}`);
         } catch (error) {
-          if (error.code !== 'ENOENT') {
+          if (error.code !== "ENOENT") {
             console.error("Gagal hapus gambar, tapi proses lanjut:", error);
           }
         }
@@ -163,11 +162,14 @@ export const deleteDestinations = async (req, res) => {
         },
       });
 
-      return res.status(200).json({ message: "Destination deleted successfully" });
+      return res
+        .status(200)
+        .json({ message: "Destination deleted successfully" });
     } else {
-      return res.status(403).json({ message: "Akses ditolak, Anda tidak memiliki izin" });
+      return res
+        .status(403)
+        .json({ message: "Akses ditolak, Anda tidak memiliki izin" });
     }
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
