@@ -1,81 +1,120 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useParams, Link } from "react-router-dom";
-import { fetchNewsById } from "@/features/news/newsSlice";
+import { Link } from "react-router-dom";
+import { fetchNews } from "@/features/news/newsSlice";
 import MainLayouts from "@/components/layouts/MainLayouts";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
 const formatDate = (dateString) =>
-  new Date(dateString).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+  new Date(dateString).toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 
-const NewsDetail = () => {
+const News = () => {
   const dispatch = useDispatch();
-  const { id } = useParams(); // Mengambil 'id' dari URL, contoh: /news/1
-  const { selectedItem: news, status, error } = useSelector((state) => state.news);
+  const { items: allNews = [], status, error } = useSelector((state) => state.news);
 
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
-    if (id) {
-      dispatch(fetchNewsById(id));
+    if (status === "idle") {
+      dispatch(fetchNews());
     }
-  }, [id, dispatch]);
+  }, [status, dispatch]);
 
-  if (status === "loading") {
-    return (
-      <MainLayouts>
-        <div className="text-center py-40">Memuat berita...</div>
-      </MainLayouts>
-    );
-  }
-
-  if (status === "failed") {
-    return (
-      <MainLayouts>
-        <div className="text-center py-40 text-red-500">Error: {error}</div>
-      </MainLayouts>
-    );
-  }
-
-  if (!news) {
-    return (
-      <MainLayouts>
-        <div className="text-center py-40">Berita tidak ditemukan.</div>
-      </MainLayouts>
-    );
-  }
+  const firstArticle = allNews[0];
+  const otherArticles = allNews.slice(1);
 
   return (
     <MainLayouts>
-      <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div className="text-center mb-8" data-aos="fade-down">
-          <Link to="/berita" className="text-teal-600 hover:text-teal-800 font-semibold">
-            &larr; Kembali ke semua berita
-          </Link>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mt-4 leading-tight">
-            {news.judul}
-          </h1>
-          <p className="mt-4 text-base text-gray-500">
-            Dipublikasikan oleh{" "}
-            <span className="font-medium text-gray-800">
-              {news.User?.name || "Admin"}
-            </span>{" "}
-            pada {formatDate(news.createdAt)}
-          </p>
-        </div>
+      <section className="bg-gray-50 py-16">
+        <div className="mx-auto max-w-screen-lg px-4 sm:px-6 lg:px-8">
+          {status === "loading" && (
+            <p className="text-center text-gray-500">Memuat berita...</p>
+          )}
 
-        <div className="my-8 rounded-xl overflow-hidden shadow-2xl" data-aos="zoom-in">
-          <img src={news.image} alt={news.judul} className="w-full h-auto object-cover"/>
-        </div>
+          {status === "failed" && (
+            <p className="text-center text-red-500">
+              Gagal memuat berita{error ? `: ${error}` : "."}
+            </p>
+          )}
 
-        <div className="prose prose-lg max-w-none text-gray-800 leading-relaxed whitespace-pre-wrap" data-aos="fade-up"
-          dangerouslySetInnerHTML={{
-            __html: news.konten.replace(/\n/g, "<br />"),
-          }}
-        />
-      </article>
+          {status === "succeeded" && allNews.length === 0 && (
+            <div className="text-center py-16">
+              <h2 className="text-2xl font-semibold text-gray-600">Belum Ada Berita</h2>
+              <p className="mt-2 text-gray-500">
+                Saat ini belum ada berita yang tersedia untuk ditampilkan.
+              </p>
+            </div>
+          )}
+
+          {status === "succeeded" && allNews.length > 0 && (
+            <>
+              {firstArticle && (
+                <div className="mb-12" data-aos="fade-down">
+                  <Link to={`/news/${firstArticle.id}`} className="block group">
+                    <div className="relative overflow-hidden rounded-xl shadow-lg">
+                      <img
+                        src={firstArticle.image}
+                        alt={firstArticle.judul}
+                        className="w-full h-auto md:h-96 object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    </div>
+                    <div className="p-6 bg-gray-50 -mt-2 rounded-b-xl">
+                      <h2 className="text-2xl md:text-3xl font-bold text-gray-900 group-hover:text-teal-600 transition-colors duration-300">
+                        {firstArticle.judul}
+                      </h2>
+                      <p className="mt-4 text-gray-700 leading-relaxed line-clamp-3">
+                        {firstArticle.konten}
+                      </p>
+                      <p className="mt-2 text-sm text-gray-500">
+                        Oleh {firstArticle.user?.name || "Admin"} &middot;{" "}
+                        {formatDate(firstArticle.createdAt)}
+                      </p>
+                    </div>
+                  </Link>
+                </div>
+              )}
+
+              {otherArticles.length > 0 && <hr className="my-12 border-gray-200" />}
+
+              <div className="space-y-10">
+                {otherArticles.map((article, index) => (
+                  <div key={article.id} data-aos="fade-up" data-aos-delay={index * 100}>
+                    <Link
+                      to={`/news/${article.id}`}
+                      className="flex flex-col sm:flex-row gap-6 group"
+                    >
+                      <div className="w-full sm:w-1/3 lg:w-1/4 h-48 sm:h-auto overflow-hidden rounded-lg">
+                        <img
+                          src={article.image}
+                          alt={article.judul}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      </div>
+                      <div className="mt-4 sm:mt-0 sm:w-2/3 lg:w-3/4">
+                        <h3 className="text-xl font-bold text-gray-800 group-hover:text-teal-600 transition-colors">
+                          {article.judul}
+                        </h3>
+                        <p className="mt-3 text-gray-600 line-clamp-2">{article.konten}</p>
+                        <p className="mt-2 text-sm text-gray-500">
+                          Oleh {article.user?.name || "Admin"} &middot;{" "}
+                          {formatDate(article.createdAt)}
+                        </p>
+                      </div>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </section>
     </MainLayouts>
   );
 };
 
-export default NewsDetail;
+export default News;

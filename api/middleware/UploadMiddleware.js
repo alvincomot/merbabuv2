@@ -1,32 +1,37 @@
-import multer from "multer";
-import { put } from "@vercel/blob";
+import express from "express";
+import {
+  getReservasi,
+  getReservasiById,
+  createReservasi,
+  updateReservasi,
+  deleteReservasi,
+} from "../controllers/ReservasiController.js";
+import { verifyUser, adminOnly } from "../middleware/AuthUser.js";
+import { upload, makeUploadToBlob } from "../middleware/UploadMiddleware.js";
 
-// simpan file di memori dulu
-export const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 35 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    const ok = /png|jpg|jpeg/i.test(file.mimetype);
-    ok ? cb(null, true) : cb(new Error("Hanya png/jpg/jpeg"));
-  },
-});
+const router = express.Router();
+const uploadToBlobReservasi = makeUploadToBlob("reservasi");
 
-export const uploadToBlob = async (req, res, next) => {
-  try {
-    if (!req.file) return next();
+router.get("/reservasi", getReservasi);
+router.get("/reservasi/:id", getReservasiById);
+router.post(
+  "/reservasi",
+  verifyUser, adminOnly,
+  upload.single("image"),
+  uploadToBlobReservasi,
+  createReservasi
+);
+router.patch(
+  "/reservasi/:id",
+  verifyUser, adminOnly,
+  upload.single("image"),
+  uploadToBlobReservasi,
+  updateReservasi
+);
+router.delete(
+  "/reservasi/:id",
+  verifyUser, adminOnly,
+  deleteReservasi
+);
 
-    const objectName = `images/${Date.now()}-${(req.file.originalname || "file").replace(/\s+/g,"_")}`;
-
-    const { url } = await put(objectName, req.file.buffer, {
-      access: "public",
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-      contentType: req.file.mimetype,
-    });
-
-    req.fileUrl = url;
-    next();
-  } catch (err) {
-    console.error("uploadToBlob error:", err);
-    res.status(500).json({ message: "Upload gagal" });
-  }
-};
+export default router;

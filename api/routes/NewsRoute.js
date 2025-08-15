@@ -1,6 +1,4 @@
-import { Router } from "express";
-import { verifyUser, adminOnly } from "../middleware/AuthUser.js";
-import { upload, uploadToBlob } from "../middleware/UploadMiddleware.js";
+import express from "express";
 import {
   getNews,
   getNewsById,
@@ -8,14 +6,15 @@ import {
   updateNews,
   deleteNews,
 } from "../controllers/NewsController.js";
+import { verifyUser, adminOnly } from "../middleware/AuthUser.js";
+import upload from "../middleware/UploadMiddleware.js";
 
-const router = Router();
+const router = express.Router();
 
-router.get("/", getNews);
-router.get("/:id", getNewsById);
-
-router.post("/", verifyUser, adminOnly, upload.single("image"), uploadToBlob, createNews);
-router.patch("/:id", verifyUser, adminOnly, upload.single("image"), uploadToBlob, updateNews);
-router.delete("/:id", verifyUser, adminOnly, deleteNews);
+router.get("/news", getNews);
+router.get("/news/:id", getNewsById);
+router.post("/news", verifyUser, adminOnly, upload.single("image"), createNews);
+router.patch("/news/:id", verifyUser, adminOnly, upload.single("image"), updateNews);
+router.delete("/news/:id", verifyUser, adminOnly, deleteNews);
 
 export default router;
