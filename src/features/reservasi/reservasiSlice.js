@@ -1,119 +1,55 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from '@/api/axios'; // Menggunakan instance axios terpusat Anda
+import api from "@/api/axios";
 
-// === ASYNC THUNKS UNTUK SEMUA OPERASI CRUD ===
+const pickErr = (e) => e?.response?.data?.message || e?.message || "Error";
 
-// 1. Mengambil semua data layanan reservasi
-export const fetchReservasi = createAsyncThunk(
-    "reservasi/fetchReservasi", 
-    async () => {
-        const response = await api.get("/reservasi");
-        return response.data;
-    }
-);
-
-// 2. Membuat layanan reservasi baru
-export const createReservasi = createAsyncThunk(
-    "reservasi/createReservasi", 
-    async (formData, { rejectWithValue }) => {
-        try {
-            const response = await api.post("/reservasi", formData);
-            return response.data; // Harapannya backend mengembalikan { message: "...", layanan: {...} }
-        } catch (error) {
-            return rejectWithValue(error.response.data);
-        }
-    }
-);
-
-// 3. Mengupdate layanan reservasi
-export const updateReservasi = createAsyncThunk(
-    "reservasi/updateReservasi", 
-    async ({ id, formData }, { rejectWithValue }) => {
-        try {
-            const response = await api.patch(`/reservasi/${id}`, formData);
-            return response.data; // Harapannya backend mengembalikan data yang diupdate
-        } catch (error) {
-            return rejectWithValue(error.response.data);
-        }
-    }
-);
-
-// 4. Menghapus layanan reservasi
-export const deleteReservasi = createAsyncThunk(
-    "reservasi/deleteReservasi", 
-    async (id, { rejectWithValue }) => {
-        try {
-            await api.delete(`"/reservasi"/${id}`);
-            return id; // Kembalikan ID agar reducer tahu item mana yang harus dihapus
-        } catch (error) {
-            return rejectWithValue(error.response.data);
-        }
-    }
-);
-
-
-// === SLICE UTAMA ===
-
-const reservasiSlice = createSlice({
-    name: "reservasi",
-    initialState: {
-        items: [],
-        status: "idle",       // Untuk status fetch data utama (GET)
-        formStatus: "idle",   // Status khusus untuk form (POST, PATCH)
-        error: null
-    },
-    reducers: {
-        // Reducer untuk mereset status form agar tidak terjebak di 'loading' atau 'failed'
-        resetFormStatus: (state) => {
-            state.formStatus = 'idle';
-            state.error = null;
-        }
-    },
-    extraReducers: (builder) => {
-        builder
-            // Kasus untuk Fetch Layanan
-            .addCase(fetchReservasi.pending, (state) => { state.status = "loading"; })
-            .addCase(fetchReservasi.fulfilled, (state, action) => {
-                state.status = "succeeded";
-                state.items = action.payload;
-            })
-            .addCase(fetchReservasi.rejected, (state, action) => {
-                state.status = "failed";
-                state.error = action.error.message;
-            })
-
-            // Kasus untuk Create Layanan
-            .addCase(createReservasi.pending, (state) => { state.formStatus = "loading"; })
-            .addCase(createReservasi.fulfilled, (state, action) => {
-                state.formStatus = "succeeded";
-                state.items.push(action.payload.layanan); // Langsung tambahkan ke state
-            })
-            .addCase(createReservasi.rejected, (state, action) => {
-                state.formStatus = "failed";
-                state.error = action.payload?.message || "Gagal membuat layanan.";
-            })
-
-            // Kasus untuk Update Layanan
-            .addCase(updateReservasi.pending, (state) => { state.formStatus = "loading"; })
-            .addCase(updateReservasi.fulfilled, (state, action) => {
-                state.formStatus = "succeeded";
-                const index = state.items.findIndex(item => item.id === action.payload.layanan.id);
-                if (index !== -1) {
-                    state.items[index] = action.payload.layanan; // Ganti data lama dengan data baru
-                }
-            })
-            .addCase(updateReservasi.rejected, (state, action) => {
-                state.formStatus = "failed";
-                state.error = action.payload?.message || "Gagal mengupdate layanan.";
-            })
-
-            // Kasus untuk Delete Layanan
-            .addCase(deleteReservasi.fulfilled, (state, action) => {
-                // action.payload adalah 'id' yang kita kembalikan dari thunk
-                state.items = state.items.filter(item => item.id !== action.payload);
-            });
-    }
+export const fetchReservasi = createAsyncThunk("reservasi/fetchAll", async (_, { rejectWithValue }) => {
+  try { const { data } = await api.get("/reservasi"); return data; }
+  catch (e) { return rejectWithValue(pickErr(e)); }
 });
 
-export const { resetFormStatus } = reservasiSlice.actions;
+export const fetchReservasiById = createAsyncThunk("reservasi/fetchById", async (id, { rejectWithValue }) => {
+  try { const { data } = await api.get(`/reservasi/${id}`); return data; }
+  catch (e) { return rejectWithValue(pickErr(e)); }
+});
+
+export const createReservasi = createAsyncThunk("reservasi/create", async (payload, { rejectWithValue }) => {
+  try { const { data } = await api.post("/reservasi", payload); return data.reservasi; }
+  catch (e) { return rejectWithValue(pickErr(e)); }
+});
+
+export const updateReservasi = createAsyncThunk("reservasi/update", async ({ id, payload }, { rejectWithValue }) => {
+  try { const { data } = await api.patch(`/reservasi/${id}`, payload); return data.reservasi; }
+  catch (e) { return rejectWithValue(pickErr(e)); }
+});
+
+export const deleteReservasi = createAsyncThunk("reservasi/delete", async (id, { rejectWithValue }) => {
+  try { await api.delete(`/reservasi/${id}`); return id; }
+  catch (e) { return rejectWithValue(pickErr(e)); }
+});
+
+const reservasiSlice = createSlice({
+  name: "reservasi",
+  initialState: { items: [], current: null, status: "idle", error: null },
+  reducers: { clearReservasi: (s) => { s.current = null; } },
+  extraReducers: (b) => {
+    b
+      .addCase(fetchReservasi.pending, (s) => { s.status = "loading"; })
+      .addCase(fetchReservasi.fulfilled, (s, a) => { s.status = "succeeded"; s.items = a.payload; s.error = null; })
+      .addCase(fetchReservasi.rejected, (s, a) => { s.status = "failed"; s.error = a.payload; })
+
+      .addCase(fetchReservasiById.fulfilled, (s, a) => { s.current = a.payload; })
+      .addCase(createReservasi.fulfilled, (s, a) => { s.items.unshift(a.payload); })
+      .addCase(updateReservasi.fulfilled, (s, a) => {
+        s.items = s.items.map((x) => (x.id === a.payload.id ? a.payload : x));
+        if (s.current?.id === a.payload.id) s.current = a.payload;
+      })
+      .addCase(deleteReservasi.fulfilled, (s, a) => {
+        s.items = s.items.filter((x) => x.id !== a.payload);
+        if (s.current?.id === a.payload) s.current = null;
+      });
+  },
+});
+
+export const { clearReservasi } = reservasiSlice.actions;
 export default reservasiSlice.reducer;

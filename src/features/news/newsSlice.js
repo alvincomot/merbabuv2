@@ -1,118 +1,55 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from '@/api/axios';
+import api from "@/api/axios";
 
-export const fetchNews = createAsyncThunk(
-  "news/fetchNews", 
-  async () => {
-    // Perbaikan: Gunakan path relatif
-    const response = await api.get("/news");
-    return response.data;
+const pickErr = (e) => e?.response?.data?.message || e?.message || "Error";
+
+export const fetchNews = createAsyncThunk("news/fetchAll", async (_, { rejectWithValue }) => {
+  try { const { data } = await api.get("/news"); return data; }
+  catch (e) { return rejectWithValue(pickErr(e)); }
 });
 
-export const fetchNewsById = createAsyncThunk("news/fetchNewsById", async (id) => {
-    // Perbaikan: Gunakan path relatif
-    const response = await api.get(`/news/${id}`);
-    return response.data;
+export const fetchNewsById = createAsyncThunk("news/fetchById", async (uuid, { rejectWithValue }) => {
+  try { const { data } = await api.get(`/news/${uuid}`); return data; }
+  catch (e) { return rejectWithValue(pickErr(e)); }
 });
 
-export const createNews = createAsyncThunk("news/createNews", async (formData, { rejectWithValue }) => {
-    try {
-        // Perbaikan: Gunakan path relatif
-        const response = await api.post("/news", formData);
-        return response.data;
-    } catch (error) {
-        return rejectWithValue(error.response.data);
-    }
+export const createNews = createAsyncThunk("news/create", async (payload, { rejectWithValue }) => {
+  try { const { data } = await api.post("/news", payload); return data.news; }
+  catch (e) { return rejectWithValue(pickErr(e)); }
 });
 
-export const updateNews = createAsyncThunk("news/updateNews", async ({ id, formData }, { rejectWithValue }) => {
-    try {
-        // Perbaikan: Gunakan path relatif
-        const response = await api.patch(`/news/${id}`, formData);
-        return response.data;
-    } catch (error) {
-        return rejectWithValue(error.response.data);
-    }
+export const updateNews = createAsyncThunk("news/update", async ({ uuid, payload }, { rejectWithValue }) => {
+  try { const { data } = await api.patch(`/news/${uuid}`, payload); return data.news; }
+  catch (e) { return rejectWithValue(pickErr(e)); }
 });
 
-export const deleteNews = createAsyncThunk("news/deleteNews", async (id, { rejectWithValue }) => {
-    try {
-        // Perbaikan: Gunakan path relatif
-        await api.delete(`/news/${id}`);
-        return id;
-    } catch (error) {
-        return rejectWithValue(error.response.data);
-    }
+export const deleteNews = createAsyncThunk("news/delete", async (uuid, { rejectWithValue }) => {
+  try { await api.delete(`/news/${uuid}`); return uuid; }
+  catch (e) { return rejectWithValue(pickErr(e)); }
 });
 
 const newsSlice = createSlice({
-    name: "news",
-    initialState: {
-        items: [],
-        selectedItem: null,
-        status: "idle",
-        formStatus: "idle",
-        error: null
-    },
-    reducers: {
-        resetFormStatus: (state) => {
-            state.formStatus = 'idle';
-            state.error = null;
-        }
-    },
-    extraReducers: (builder) => {
-        builder
-            // Kasus untuk Fetch
-            .addCase(fetchNews.pending, (state) => { state.status = "loading"; })
-            .addCase(fetchNews.fulfilled, (state, action) => {
-                state.status = "succeeded";
-                state.items = action.payload;
-            })
-            .addCase(fetchNews.rejected, (state, action) => {
-                state.status = "failed";
-                state.error = action.error.message;
-            })
-            // Kasus untuk Create
-            .addCase(createNews.pending, (state) => { state.formStatus = "loading"; })
-            .addCase(createNews.fulfilled, (state, action) => {
-                state.formStatus = "succeeded";
-                state.items.unshift(action.payload.news);
-            })
-            .addCase(createNews.rejected, (state, action) => {
-                state.formStatus = "failed";
-                state.error = action.payload?.message || "Gagal membuat berita.";
-            })
-            // Kasus untuk Update
-            .addCase(updateNews.pending, (state) => { state.formStatus = "loading"; })
-            .addCase(updateNews.fulfilled, (state, action) => {
-                state.formStatus = "succeeded";
-                const index = state.items.findIndex(item => item.id === action.payload.news.id);
-                if (index !== -1) {
-                    state.items[index] = action.payload.news;
-                }
-            })
-            .addCase(updateNews.rejected, (state, action) => {
-                state.formStatus = "failed";
-                state.error = action.payload?.message || "Gagal mengupdate berita.";
-            })
-            .addCase(deleteNews.fulfilled, (state, action) => {
-                state.items = state.items.filter(item => item.id !== action.payload);
-            })
-            
-            .addCase(fetchNewsById.pending, (state) => {
-                state.status = 'loading';
-            })
-            .addCase(fetchNewsById.fulfilled, (state, action) => {
-                state.status = 'succeeded';
-                state.selectedItem = action.payload;
-            })
-            .addCase(fetchNewsById.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.error.message;
-            })
-    }
-}
-);
+  name: "news",
+  initialState: { items: [], current: null, status: "idle", error: null },
+  reducers: { clearNews: (s) => { s.current = null; } },
+  extraReducers: (b) => {
+    b
+      .addCase(fetchNews.pending, (s) => { s.status = "loading"; })
+      .addCase(fetchNews.fulfilled, (s, a) => { s.status = "succeeded"; s.items = a.payload; s.error = null; })
+      .addCase(fetchNews.rejected, (s, a) => { s.status = "failed"; s.error = a.payload; })
 
-export const { resetFormStatus } = newsSlice.actions;
+      .addCase(fetchNewsById.fulfilled, (s, a) => { s.current = a.payload; })
+      .addCase(createNews.fulfilled, (s, a) => { s.items.unshift(a.payload); })
+      .addCase(updateNews.fulfilled, (s, a) => {
+        s.items = s.items.map((x) => (x.uuid === a.payload.uuid ? a.payload : x));
+        if (s.current?.uuid === a.payload.uuid) s.current = a.payload;
+      })
+      .addCase(deleteNews.fulfilled, (s, a) => {
+        s.items = s.items.filter((x) => x.uuid !== a.payload);
+        if (s.current?.uuid === a.payload) s.current = null;
+      });
+  },
+});
+
+export const { clearNews } = newsSlice.actions;
 export default newsSlice.reducer;

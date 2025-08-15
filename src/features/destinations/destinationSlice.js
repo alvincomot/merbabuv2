@@ -1,128 +1,93 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from '@/api/axios.js';
+import api from "@/api/axios";
+
+const pickErr = (e) => e?.response?.data?.message || e?.message || "Error";
 
 export const fetchDestinations = createAsyncThunk(
-  "destinations/fetchDestinations",
-  async () => {
-    const response = await api.get("/destinations");
-    return response.data;
+  "destinations/fetchAll",
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await api.get("/destinations");
+      return data;
+    } catch (e) {
+      return rejectWithValue(pickErr(e));
+    }
   }
 );
 
-// 2. Membuat destinasi baru (dengan FormData untuk gambar)
+export const fetchDestinationById = createAsyncThunk(
+  "destinations/fetchById",
+  async (uuid, { rejectWithValue }) => {
+    try {
+      const { data } = await api.get(`/destinations/${uuid}`);
+      return data;
+    } catch (e) {
+      return rejectWithValue(pickErr(e));
+    }
+  }
+);
+
 export const createDestination = createAsyncThunk(
-  "destinations/createDestinations",
-  async (formData, { rejectWithValue }) => {
+  "destinations/create",
+  async (payload, { rejectWithValue }) => {
     try {
-      const response = await api.post("/destinations", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.response.data);
+      // payload boleh FormData (image)
+      const { data } = await api.post("/destinations", payload);
+      return data.destination; // lihat controller
+    } catch (e) {
+      return rejectWithValue(pickErr(e));
     }
   }
 );
 
-// 3. Mengupdate destinasi yang ada
 export const updateDestination = createAsyncThunk(
-  "destinations/updateDestination",
-  async ({ id, formData }, { rejectWithValue }) => {
+  "destinations/update",
+  async ({ uuid, payload }, { rejectWithValue }) => {
     try {
-      const response = await api.patch(`${"/destinations"}/${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.response.data);
+      const { data } = await api.patch(`/destinations/${uuid}`, payload);
+      return data.destination;
+    } catch (e) {
+      return rejectWithValue(pickErr(e));
     }
   }
 );
 
-// 4. Menghapus destinasi
 export const deleteDestination = createAsyncThunk(
-  "destinations/deleteDestination",
-  async (id, { rejectWithValue }) => {
+  "destinations/delete",
+  async (uuid, { rejectWithValue }) => {
     try {
-      await api.delete(`${"/destinations"}/${id}`);
-      // Kembalikan ID agar kita tahu item mana yang harus dihapus dari state
-      return id;
-    } catch (error) {
-      return rejectWithValue(error.response.data);
+      await api.delete(`/destinations/${uuid}`);
+      return uuid;
+    } catch (e) {
+      return rejectWithValue(pickErr(e));
     }
   }
 );
-
-
-// --- SLICE UTAMA ---
 
 const destinationSlice = createSlice({
   name: "destinations",
-  initialState: {
-    items: [],
-    // Ini untuk status fetch data utama
-    status: "idle", 
-    // ✅ TAMBAHKAN STATE BARU INI untuk status form submit
-    addEditStatus: "idle", // 'idle' | 'loading' | 'succeeded' | 'failed'
-    error: null,
-  },
-  reducers: {
-    // Tambahkan reducer untuk mereset status form
-    resetAddEditStatus: (state) => {
-        state.addEditStatus = 'idle';
-    }
-  },
-  extraReducers: (builder) => {
-    builder
-      // Kasus untuk Fetch (hanya mengubah 'status' utama)
-      .addCase(fetchDestinations.pending, (state) => {
-        state.status = "loading";
-      })
-      .addCase(fetchDestinations.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.items = action.payload;
-      })
-      .addCase(fetchDestinations.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.error.message;
-      })
+  initialState: { items: [], current: null, status: "idle", error: null },
+  reducers: { clearCurrent: (s) => { s.current = null; } },
+  extraReducers: (b) => {
+    b
+      .addCase(fetchDestinations.pending, (s) => { s.status = "loading"; })
+      .addCase(fetchDestinations.fulfilled, (s, a) => { s.status = "succeeded"; s.items = a.payload; s.error = null; })
+      .addCase(fetchDestinations.rejected, (s, a) => { s.status = "failed"; s.error = a.payload; })
 
-      // Kasus untuk Create (hanya mengubah 'addEditStatus')
-      .addCase(createDestination.pending, (state) => {
-        state.addEditStatus = "loading"; // Gunakan state baru
-      })
-      .addCase(createDestination.fulfilled, (state, action) => {
-        state.addEditStatus = "succeeded";
-        state.items.push(action.payload.destination);
-      })
-      .addCase(createDestination.rejected, (state, action) => {
-        state.addEditStatus = "failed";
-        state.error = action.payload?.message || action.error.message;
-      })
+      .addCase(fetchDestinationById.fulfilled, (s, a) => { s.current = a.payload; s.error = null; })
+      .addCase(fetchDestinationById.rejected, (s, a) => { s.error = a.payload; })
 
-      // Kasus untuk Update (juga hanya mengubah 'addEditStatus')
-      .addCase(updateDestination.pending, (state) => {
-        state.addEditStatus = "loading"; // Gunakan state baru
+      .addCase(createDestination.fulfilled, (s, a) => { s.items.unshift(a.payload); s.error = null; })
+      .addCase(updateDestination.fulfilled, (s, a) => {
+        s.items = s.items.map((x) => (x.uuid === a.payload.uuid ? a.payload : x));
+        if (s.current?.uuid === a.payload.uuid) s.current = a.payload;
       })
-      .addCase(updateDestination.fulfilled, (state, action) => {
-        state.addEditStatus = "succeeded";
-        const index = state.items.findIndex((item) => item.uuid === action.payload.uuid);
-        if (index !== -1) {
-          state.items[index] = action.payload;
-        }
-      })
-      .addCase(updateDestination.rejected, (state, action) => {
-        state.addEditStatus = "failed";
-        state.error = action.payload?.message || action.error.message;
-      })
-      
-      // Kasus untuk delete bisa dibiarkan atau dibuatkan status sendiri jika perlu
-      .addCase(deleteDestination.fulfilled, (state, action) => {
-        state.items = state.items.filter((item) => item.uuid !== action.payload);
+      .addCase(deleteDestination.fulfilled, (s, a) => {
+        s.items = s.items.filter((x) => x.uuid !== a.payload);
+        if (s.current?.uuid === a.payload) s.current = null;
       });
   },
 });
 
-// Ekspor reducer baru
-export const { resetAddEditStatus } = destinationSlice.actions;
+export const { clearCurrent } = destinationSlice.actions;
 export default destinationSlice.reducer;

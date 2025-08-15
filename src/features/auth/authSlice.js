@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from "@/api/axios";
+import api from "@/api/axios"; // pastikan api set { baseURL: import.meta.env.VITE_API_URL || "/api", withCredentials: true }
 
 const initialState = {
   user: null,
@@ -12,11 +12,10 @@ export const registerUser = createAsyncThunk(
   "auth/registerUser",
   async (userData, { rejectWithValue }) => {
     try {
-      // Perbaikan: Gunakan path relatif
-      const response = await api.post("/register", userData);
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.response.data);
+      const { data } = await api.post("/auth/register", userData);
+      return data;
+    } catch (err) {
+      return rejectWithValue(err?.response?.data || { message: err.message });
     }
   }
 );
@@ -25,32 +24,26 @@ export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (credentials, { rejectWithValue }) => {
     try {
-      // Perbaikan: Gunakan path relatif
-      const response = await api.post("/login", credentials);
-      return response.data;
-    } catch (error) {
-      if (error.response && error.response.data.message) {
-        return rejectWithValue(error.response.data);
-      } else {
-        return rejectWithValue({ message: error.message });
-      }
+      const { data } = await api.post("/auth/login", credentials);
+      return data;
+    } catch (err) {
+      return rejectWithValue(err?.response?.data || { message: err.message });
     }
   }
 );
 
 export const logoutUser = createAsyncThunk("auth/logoutUser", async () => {
-  // Perbaikan: Gunakan path relatif
-  await api.delete("/logout");
+  await api.delete("/auth/logout");
 });
 
 export const getMe = createAsyncThunk(
   "auth/getMe",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get("/me");
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.response.data);
+      const { data } = await api.get("/auth/me");
+      return data;
+    } catch (err) {
+      return rejectWithValue(err?.response?.data || { message: err.message });
     }
   }
 );
@@ -63,52 +56,23 @@ const authSlice = createSlice({
       state.user = null;
       state.isAuthenticated = false;
       state.status = "idle";
-      state.formStatus = "idle";
       state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(registerUser.pending, (state) => {
-        state.formStatus = "loading";
-      })
-      .addCase(registerUser.fulfilled, (state) => {
-        state.formStatus = "succeeded";
-        state.error = null; // Bersihkan error jika sukses
-      })
-      .addCase(registerUser.rejected, (state, action) => {
-        state.formStatus = "failed";
-        state.error = action.payload?.message || "Registrasi gagal.";
-      })
-      // Kasus untuk Login
-      .addCase(loginUser.pending, (state) => {
-        state.status = "loading";
-      })
-      .addCase(loginUser.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.isAuthenticated = true;
-        state.user = action.payload;
-      })
-      .addCase(loginUser.rejected, (state, action) => {
-        state.status = "failed";
-        state.isAuthenticated = false;
-        state.user = null;
-        state.error = action.payload.message;
-      })
-      // Kasus untuk Logout
-      .addCase(logoutUser.fulfilled, (state) => {
-        state.isAuthenticated = false;
-        state.user = null;
-      })
-      // Kasus untuk GetMe (memeriksa sesi)
-      .addCase(getMe.fulfilled, (state, action) => {
-        state.isAuthenticated = true;
-        state.user = action.payload;
-      })
-      .addCase(getMe.rejected, (state) => {
-        state.isAuthenticated = false;
-        state.user = null;
-      });
+      .addCase(registerUser.pending, (s) => { s.status = "loading"; })
+      .addCase(registerUser.fulfilled, (s) => { s.status = "succeeded"; s.error = null; })
+      .addCase(registerUser.rejected, (s, a) => { s.status = "failed"; s.error = a.payload?.message || "Registrasi gagal."; })
+
+      .addCase(loginUser.pending, (s) => { s.status = "loading"; })
+      .addCase(loginUser.fulfilled, (s, a) => { s.status = "succeeded"; s.isAuthenticated = true; s.user = a.payload; s.error = null; })
+      .addCase(loginUser.rejected, (s, a) => { s.status = "failed"; s.isAuthenticated = false; s.user = null; s.error = a.payload?.message || "Login gagal."; })
+
+      .addCase(logoutUser.fulfilled, (s) => { s.isAuthenticated = false; s.user = null; })
+
+      .addCase(getMe.fulfilled, (s, a) => { s.isAuthenticated = true; s.user = a.payload; })
+      .addCase(getMe.rejected, (s) => { s.isAuthenticated = false; s.user = null; });
   },
 });
 

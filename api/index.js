@@ -21,9 +21,17 @@ const __dirname = path.dirname(__filename);
 
 const allowedOrigins = ["https://merbabuv2.vercel.app", "http://localhost:5173"];
 
+const isAllowed = (origin) => {
+  if (!origin) return true; // same-origin / server-to-server
+  if (allowedOrigins.includes(origin)) return true;
+  // allow preview deployments: https://*.vercel.app
+  if (/^https:\/\/.+\.vercel\.app$/i.test(origin)) return true;
+  return false;
+};
+
 app.use(cors({
-  origin: (origin, cb) => (!origin || allowedOrigins.includes(origin)) ? cb(null, true) : cb(new Error("Not allowed by CORS")),
-  credentials: true
+  origin: (origin, cb) => isAllowed(origin) ? cb(null, true) : cb(new Error("Not allowed by CORS")),
+  credentials: true,
 }));
 
 app.use(express.json());
