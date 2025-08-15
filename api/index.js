@@ -49,7 +49,7 @@ app.set("trust proxy", 1);
 app.use(
   session({
     name: "sid",                         // nama cookie
-    secret: process.env.SESSION_SECRET || "dev-secret",
+    secret: process.env.SESS_SECRET || "dev-secret",
     resave: false,                       // Prisma store tidak butuh resave
     saveUninitialized: false,            // jangan buat session kosong
     proxy: true,                         // penting saat di belakang proxy (Vercel)
