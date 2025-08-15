@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node api/index.js",
+    "postinstall": "prisma generate",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
