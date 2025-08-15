@@ -17,8 +17,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const allowedOrigins = [
-  "http://localhost:5173",
-  "https://merbabuv2.vercel.app"
+  "https://merbabuv2.vercel.app",
+  "http://localhost:5173"
 ];
 
 const dbClient = await (async () => {

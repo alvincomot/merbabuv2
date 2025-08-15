@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node api/index.js",
     "dev": "vite",
-    "build": "vite build && npx prisma generate",
+    "build": "vite build && prisma generate",
     "lint": "eslint .",
     "preview": "vite preview"
   },
