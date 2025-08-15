@@ -2,8 +2,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const appConfig = {
-  nodeEnv: process.env.NODE_ENV || "development", // development | production
-  dbClient: process.env.DB_CLIENT || "sequelize", // sequelize | prisma
+  nodeEnv: process.env.NODE_ENV || "production", // development | production
+  dbClient: process.env.DB_CLIENT || "prisma", // sequelize | prisma
 };
 
 export const sequelizeConfig = {
