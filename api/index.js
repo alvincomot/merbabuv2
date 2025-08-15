@@ -1,4 +1,3 @@
-// api/index.js (Prisma-ready)
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -25,11 +24,11 @@ const allowedOrigins = [
 const dbClient = await (async () => {
   if (process.env.NODE_ENV === 'production') {
     console.log("Running in production with PostgreSQL + Prisma");
-    const { default: prisma } = await import('../config/prisma.js');
+    const { default: prisma } = await import('./config/prisma.js');
     return prisma;
   } else {
     console.log("Running in development with MySQL + Sequelize");
-    const { default: sequelize } = await import('../config/config.js');
+    const { default: sequelize } = await import('./config/config.js');
     try {
       await sequelize.authenticate();
       console.log('MySQL connection has been established successfully.');
