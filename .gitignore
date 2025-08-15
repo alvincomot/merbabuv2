@@ -4,11 +4,6 @@
 # Abaikan folder dependensi di semua sub-direktori
 **/node_modules
 
-### Build Output ###
-# Abaikan folder hasil build dari frontend (Vite/Create React App)
-/frontend/dist
-/frontend/build
-
 ### Environment Variables ###
 # Abaikan file environment. JANGAN PERNAH push API keys atau password ke GitHub.
 # Selalu buat file .env.example sebagai gantinya untuk dilacak.
@@ -38,4 +33,4 @@ Thumbs.db
 # Jika Anda tidak ingin melacak gambar yang diunggah oleh pengguna di Git,
 # hapus tanda pagar dari baris di bawah ini.
 # /backend/public/images
-/src/generated/prisma
+# /src/generated/prisma
