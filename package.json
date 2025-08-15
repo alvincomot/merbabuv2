@@ -3,7 +3,6 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "main": "/src/App.jsx",
   "scripts": {
     "start": "node api/index.js",
     "dev": "vite",
@@ -12,7 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@prisma/client": "^6.13.0",
+    "@prisma/client": "^6.14.0",
     "@reduxjs/toolkit": "^2.8.2",
     "aos": "^2.3.4",
     "argon2": "^0.43.0",

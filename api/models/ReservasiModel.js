@@ -1,9 +1,12 @@
 import { Sequelize } from "sequelize";
 import db from "../config/Database.js";
 
-const { DataTypes } = Sequelize;
+let LayananReservasi;
 
-const LayananReservasi = db.define('reservasi', {
+
+if (process.env.NODE_ENV !== "production") {
+  const { DataTypes } = await import("sequelize");
+  LayananReservasi = db.define('reservasi', {
     judul: {
         type: DataTypes.STRING,
         allowNull: false
@@ -27,5 +30,13 @@ const LayananReservasi = db.define('reservasi', {
 }, {
     freezeTableName: true
 });
+
+} else {
+  // Prisma (PostgreSQL)
+  const { PrismaClient } = await import("@prisma/client");
+  const prisma = new PrismaClient();
+  
+  LayananReservasi = prisma.reservasi; // Prisma sudah auto-mapping ke table
+}
 
 export default LayananReservasi;

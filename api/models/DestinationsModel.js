@@ -1,8 +1,11 @@
 import { Sequelize } from "sequelize";
 import db from "../config/Database.js";
 
-const { DataTypes } = Sequelize;
-const Destinations = db.define('destination', {
+let Destinations;
+
+if (process.env.NODE_ENV !== "production") {
+  const { DataTypes } = await import("sequelize");
+  Destinations = db.define('destination', {
     uuid: {
         type: DataTypes.STRING,
         defaultValue: DataTypes.UUIDV4,
@@ -43,5 +46,13 @@ const Destinations = db.define('destination', {
 }, {
     freezeTableName: true,
 });
+
+} else {
+  // Prisma (PostgreSQL)
+  const { PrismaClient } = await import("@prisma/client");
+  const prisma = new PrismaClient();
+  
+  Destinations = prisma.destination; // Prisma sudah auto-mapping ke table
+}
 
 export default Destinations;

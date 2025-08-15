@@ -38,3 +38,4 @@ Thumbs.db
 # Jika Anda tidak ingin melacak gambar yang diunggah oleh pengguna di Git,
 # hapus tanda pagar dari baris di bawah ini.
 # /backend/public/images
+/src/generated/prisma
