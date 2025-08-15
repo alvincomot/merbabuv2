@@ -1,99 +1,85 @@
-import LayananReservasi from "../models/ReservasiModel.js";
-import path from 'path';
-import fs from 'fs';
+import prisma from "../config/prisma.js";
 
-// GET semua layanan reservasi (Publik)
-export const getLayananReservasi = async (req, res) => {
-    try {
-        const response = await LayananReservasi.findAll({
-            order: [['id', 'ASC']] // Urutkan berdasarkan ID
-        });
-        res.status(200).json(response);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+const apiBase = (req) =>
+  process.env.BACKEND_URL?.replace(/\/$/, "") ||
+  `${req.protocol}://${req.get("host")}/api`;
+const toImageUrl = (req, image) => (!image ? null : (/^https?:\/\//i.test(image) ? image : `${apiBase(req)}/images/${image}`));
+
+// GET /reservasi
+export const getReservasi = async (_req, res) => {
+  try {
+    const rows = await prisma.reservasi.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+    res.status(200).json(rows.map(r => ({ ...r, image: toImageUrl(_req, r.image) })));
+  } catch (e) {
+    console.error("getReservasi", e);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
-// CREATE layanan reservasi baru (Admin)
-export const createLayananReservasi = async (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ message: "File gambar wajib diunggah." });
-    }
-    
+// GET /reservasi/:id
+export const getReservasiById = async (req, res) => {
+  try {
+    const r = await prisma.reservasi.findUnique({ where: { id: Number(req.params.id) } });
+    if (!r) return res.status(404).json({ message: "Reservasi not found" });
+    res.status(200).json({ ...r, image: toImageUrl(req, r.image) });
+  } catch (e) {
+    console.error("getReservasiById", e);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// POST /reservasi  (admin)
+export const createReservasi = async (req, res) => {
+  try {
     const { judul, deskripsi_singkat, nomor_whatsapp, pesan_whatsapp } = req.body;
-    const fileName = req.file.filename;
-    const imageUrl = `${req.protocol}://${req.get("host")}/images/${fileName}`;
+    const image = req.fileUrl ?? null;
 
-    try {
-        const newLayanan = await LayananReservasi.create({
-            judul,
-            deskripsi_singkat,
-            image: imageUrl,
-            nomor_whatsapp,
-            pesan_whatsapp
-        });
-        res.status(201).json({ message: "Layanan Reservasi berhasil dibuat", layanan: newLayanan });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+    const r = await prisma.reservasi.create({
+      data: { judul, deskripsi_singkat, image, nomor_whatsapp, pesan_whatsapp },
+    });
+    res.status(201).json({ message: "Reservasi dibuat", reservasi: { ...r, image: toImageUrl(req, r.image) } });
+  } catch (e) {
+    console.error("createReservasi", e);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
-// ✅ UPDATE layanan reservasi (Admin)
-export const updateLayananReservasi = async (req, res) => {
-    try {
-        const layanan = await LayananReservasi.findByPk(req.params.id);
-        if (!layanan) return res.status(404).json({ message: "Layanan tidak ditemukan" });
+// PATCH /reservasi/:id  (admin)
+export const updateReservasi = async (req, res) => {
+  try {
+    const existing = await prisma.reservasi.findUnique({ where: { id: Number(req.params.id) } });
+    if (!existing) return res.status(404).json({ message: "Reservasi not found" });
 
-        let imageUrl = layanan.image;
-        // Cek jika ada file gambar baru yang diunggah
-        if (req.file) {
-            // Hapus gambar lama jika ada
-            if (layanan.image) {
-                const oldImageName = layanan.image.split('/images/')[1];
-                const oldImagePath = path.join('public/images', oldImageName);
-                if (fs.existsSync(oldImagePath)) {
-                    fs.unlinkSync(oldImagePath);
-                }
-            }
-            // Atur URL untuk gambar baru
-            imageUrl = `${req.protocol}://${req.get("host")}/images/${req.file.filename}`;
-        }
+    const { judul, deskripsi_singkat, nomor_whatsapp, pesan_whatsapp } = req.body;
+    const image = req.fileUrl ?? existing.image;
 
-        const { judul, deskripsi_singkat, nomor_whatsapp, pesan_whatsapp } = req.body;
-
-        await layanan.update({
-            judul,
-            deskripsi_singkat,
-            image: imageUrl,
-            nomor_whatsapp,
-            pesan_whatsapp
-        });
-
-        res.status(200).json({ message: "Layanan Reservasi berhasil diperbarui", layanan: layanan });
-
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+    const r = await prisma.reservasi.update({
+      where: { id: Number(req.params.id) },
+      data: {
+        judul: judul ?? undefined,
+        deskripsi_singkat: deskripsi_singkat ?? undefined,
+        nomor_whatsapp: nomor_whatsapp ?? undefined,
+        pesan_whatsapp: pesan_whatsapp ?? undefined,
+        image,
+      },
+    });
+    res.status(200).json({ message: "Reservasi diperbarui", reservasi: { ...r, image: toImageUrl(req, r.image) } });
+  } catch (e) {
+    console.error("updateReservasi", e);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
-export const deleteLayananReservasi = async (req, res) => {
-    try {
-        const layanan = await LayananReservasi.findByPk(req.params.id);
-        if (!layanan) return res.status(404).json({ message: "Layanan tidak ditemukan" });
-
-        // Hapus file gambar terkait dari server
-        if (layanan.image) {
-            const oldImageName = layanan.image.split('/images/')[1];
-            const oldImagePath = path.join('public/images', oldImageName);
-            if (fs.existsSync(oldImagePath)) {
-                fs.unlinkSync(oldImagePath);
-            }
-        }
-
-        await layanan.destroy();
-        res.status(200).json({ message: "Layanan Reservasi berhasil dihapus" });
-
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+// DELETE /reservasi/:id  (admin)
+export const deleteReservasi = async (req, res) => {
+  try {
+    await prisma.reservasi.delete({ where: { id: Number(req.params.id) } });
+    res.status(200).json({ message: "Reservasi dihapus" });
+  } catch (e) {
+    console.error("deleteReservasi", e);
+    if (e.code === "P2025") return res.status(404).json({ message: "Reservasi not found" });
+    res.status(500).json({ message: "Internal server error" });
+  }
 };

@@ -1,79 +1,82 @@
-import User from "../models/UserModel.js";
+import prisma from "../config/prisma.js";
 import argon2 from "argon2";
+import { randomUUID } from "crypto";
 
-export const register = async (req, res) => {
-  const { name, email, password, confPassword } = req.body;
-
-  if (password !== confPassword) {
-    return res
-      .status(400)
-      .json({ message: "Password dan Konfirmasi Password tidak cocok" });
+// GET /auth/me
+export const getMe = async (req, res) => {
+  if (!req.session?.userId) {
+    return res.status(401).json({ message: "Unauthorized" });
   }
-
-  const hashPassword = await argon2.hash(password);
-
-  try {
-    await User.create({
-      name: name,
-      email: email,
-      password: hashPassword,
-      role: "user",
-    });
-
-    res.status(201).json({ message: "Registrasi berhasil, silakan login." });
-  } catch (error) {
-    if (error.name === "SequelizeUniqueConstraintError") {
-      return res.status(400).json({ message: "Email sudah terdaftar." });
-    }
-    res.status(400).json({ message: error.message });
-  }
-};
-
-export const login = async (req, res) => {
-  const user = await User.findOne({
-    where: {
-      email: req.body.email,
-    },
+  const user = await prisma.user.findUnique({
+    where: { uuid: req.session.userId },
+    select: { uuid: true, name: true, email: true, role: true },
   });
   if (!user) return res.status(404).json({ message: "User not found" });
-  const match = await argon2.verify(user.password, req.body.password);
-  if (!match)
-    return res.status(400).json({ message: "Invalid email or password" });
-  req.session.userId = user.uuid;
-  const uuid = user.uuid;
-  const name = user.name;
-  const email = user.email;
-  const role = user.role;
-  res.status(200).json({ uuid, name, email, role });
+  res.status(200).json(user);
 };
 
-export const Me = async (req, res) => {
-  if (!req.session || !req.session.userId) {
-    return res.status(401).json({ message: "Akses ditolak, silakan login." });
-  }
-
+// POST /auth/register
+export const Register = async (req, res) => {
   try {
-    const user = await User.findOne({
-      attributes: ["uuid", "name", "email", "role"],
-      where: {
-        uuid: req.session.userId,
-      },
-    });
-
-    if (!user) {
-      return res.status(404).json({ message: "User tidak ditemukan." });
+    const { name, email, password, confPassword, role } = req.body;
+    if (!name || !email || !password || !confPassword) {
+      return res.status(400).json({ message: "Field wajib diisi" });
     }
+    if (password !== confPassword) {
+      return res.status(400).json({ message: "Password tidak cocok" });
+    }
+    const exists = await prisma.user.findUnique({ where: { email } });
+    if (exists) return res.status(409).json({ message: "Email sudah terpakai" });
 
-    res.status(200).json(user);
-  } catch (error) {
-    console.error("Error di controller Me:", error);
-    res.status(500).json({ message: "Terjadi kesalahan pada server." });
+    const hash = await argon2.hash(password);
+    const user = await prisma.user.create({
+      data: {
+        uuid: randomUUID(),
+        name,
+        email,
+        password: hash,
+        role: role || "user",
+      },
+      select: { uuid: true, name: true, email: true, role: true },
+    });
+    res.status(201).json({ message: "Registrasi berhasil", user });
+  } catch (e) {
+    console.error("Register error:", e);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
-export const logout = (req, res) => {
-  req.session.destroy((err) => {
-    if (err) return res.status(400).json({ message: "Failed to logout" });
-    res.status(200).json({ message: "Logout successful" });
-  });
+// POST /auth/login
+export const Login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return res.status(404).json({ message: "User tidak ditemukan" });
+
+    const ok = await argon2.verify(user.password, password);
+    if (!ok) return res.status(400).json({ message: "Password salah" });
+
+    // simpan UUID ke session
+    req.session.userId = user.uuid;
+
+    res.status(200).json({
+      message: "Login sukses",
+      user: { uuid: user.uuid, name: user.name, email: user.email, role: user.role },
+    });
+  } catch (e) {
+    console.error("Login error:", e);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// DELETE /auth/logout  (atau POST)
+export const LogOut = async (req, res) => {
+  try {
+    req.session?.destroy?.(() => {});
+    res.clearCookie?.("sid"); // samakan dengan name cookie di session()
+    return res.status(200).json({ message: "Logout sukses" });
+  } catch (e) {
+    console.error("Logout error:", e);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 };

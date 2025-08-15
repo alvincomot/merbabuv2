@@ -1,176 +1,124 @@
-import Destinations from "../models/DestinationsModel.js";
-import User from "../models/UserModel.js";
-import path from "path";
-import fs from "fs/promises";
+import prisma from "../config/prisma.js";
+import { del as blobDel } from "@vercel/blob";
+
+const apiBase = (req) =>
+  (process.env.BACKEND_URL?.replace(/\/$/, "") ||
+    `${req.protocol}://${req.get("host")}`) + "/api";
+
+const toImageUrl = (req, image) => {
+  if (!image) return null;
+  if (/^https?:\/\//i.test(image)) return image;
+  return `${apiBase(req)}/images/${image}`;
+};
 
 export const getDestinations = async (req, res) => {
   try {
-    const response = await Destinations.findAll({
-      attributes: ["uuid", "name", "description", "image", "location"],
+    const rows = await prisma.destination.findMany({
+      select: { uuid: true, name: true, description: true, image: true, location: true },
+      orderBy: { name: "asc" },
     });
 
-    const destinationsWithUrls = response.map((dest) => {
-      const imageUrl = `${process.env.BACKEND_URL}/images/${dest.image}`;
-      return {
-        uuid: dest.uuid,
-        name: dest.name,
-        description: dest.description,
-        location: dest.location,
-        image: imageUrl, // Kirim URL lengkap, bukan hanya nama file
-      };
-    });
-
-    res.status(200).json(response);
+    const data = rows.map((d) => ({ ...d, image: toImageUrl(req, d.image) }));
+    return res.status(200).json(data);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("getDestinations (Prisma) error:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const getDestinationsById = async (req, res) => {
   try {
-    const destination = await Destinations.findOne({
-      where: {
-        uuid: req.params.id,
-      },
+    const d = await prisma.destination.findUnique({
+      where: { uuid: req.params.id },
+      select: { uuid: true, name: true, description: true, image: true, location: true },
     });
-    if (!destination)
-      return res.status(404).json({ message: "Destination not found" });
-
-    let response;
-    if (req.role === "admin") {
-      response = await Destinations.findOne({
-        where: {
-          id: destination.id,
-        },
-      });
-    }
-    res.status(200).json(response);
+    if (!d) return res.status(404).json({ message: "Destination not found" });
+    return res.status(200).json({ ...d, image: toImageUrl(req, d.image) });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("getDestinationsById (Prisma) error:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const createDestinations = async (req, res) => {
-  const { name, description, location } = req.body;
-
-  if (!req.file) {
-    return res
-      .status(400)
-      .json({ message: "Tidak ada file gambar yang diunggah." });
-  }
-  const fileName = req.file.filename;
-
   try {
-    const newDestination = await Destinations.create({
-      name: name,
-      description: description,
-      image: fileName,
-      location: location,
+    const { name, description, location } = req.body;
+
+    if (!name || !description || !location) {
+      return res.status(400).json({ message: "name/description/location wajib diisi" });
+    }
+
+    const image = req.fileUrl ?? req.file?.filename ?? null;
+
+    const created = await prisma.destination.create({
+      data: { name, description, location, image },
+      select: { uuid: true, name: true, description: true, image: true, location: true },
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Destinasi berhasil dibuat",
-      destination: newDestination,
+      destination: { ...created, image: toImageUrl(req, created.image) },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("createDestinations (Prisma) error:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const updateDestinations = async (req, res) => {
   try {
-    const destination = await Destinations.findOne({
+    const existing = await prisma.destination.findUnique({
       where: { uuid: req.params.id },
+      select: { image: true },
     });
-    if (!destination)
-      return res.status(404).json({ message: "Data tidak ditemukan" });
-
-    let imageUrl = destination.image;
-    if (req.file) {
-      console.log("Gambar baru terdeteksi. Mengganti file gambar...");
-
-      if (req.file && destination.image) {
-        try {
-          const oldImageName = path.basename(destination.image);
-          const oldImagePath = path.join("public/images", oldImageName);
-
-          await fs.unlink(oldImagePath);
-          console.log("Gambar lama berhasil dihapus:", oldImagePath);
-        } catch (error) {
-          if (error.code !== "ENOENT") {
-            console.error(
-              "Gagal menghapus gambar lama, tapi proses lanjut:",
-              error
-            );
-          }
-        }
-      }
-
-      // generate url baru untuk gambar yang diupload
-      const newFileName = req.file.filename;
-    }
+    if (!existing) return res.status(404).json({ message: "Data tidak ditemukan" });
 
     const { name, description, location } = req.body;
-    await destination.update({
-      name: name,
-      description: description,
-      location: location,
-      image: newFileName,
+    const newImage = req.fileUrl ?? req.file?.filename ?? existing.image;
+
+    const updated = await prisma.destination.update({
+      where: { uuid: req.params.id },
+      data: {
+        name: name ?? undefined,
+        description: description ?? undefined,
+        location: location ?? undefined,
+        image: newImage,
+      },
+      select: { uuid: true, name: true, description: true, image: true, location: true },
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Destinasi berhasil diperbarui",
-      destination: destination,
+      destination: { ...updated, image: toImageUrl(req, updated.image) },
     });
   } catch (error) {
-    console.error("Error saat update destinasi:", error);
-    res
-      .status(500)
-      .json({ message: "Terjadi kesalahan pada server", error: error.message });
+    console.error("updateDestinations (Prisma) error:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const deleteDestinations = async (req, res) => {
   try {
-    const destination = await Destinations.findOne({
-      where: {
-        uuid: req.params.id,
-      },
+    const existing = await prisma.destination.findUnique({
+      where: { uuid: req.params.id },
+      select: { image: true },
     });
+    if (!existing) return res.status(404).json({ message: "Destination not found" });
 
-    if (!destination) {
-      return res.status(404).json({ message: "Destination not found" });
-    }
-
-    if (req.role === "admin") {
-      if (destination.image) {
-        const imageName = path.basename(destination.image);
-        const imagePath = path.join("public/images", imageName);
-        try {
-          await fs.unlink(imagePath);
-          console.log(`Gambar berhasil dihapus: ${imageName}`);
-        } catch (error) {
-          if (error.code !== "ENOENT") {
-            console.error("Gagal hapus gambar, tapi proses lanjut:", error);
-          }
-        }
+    if (existing.image?.startsWith("https://blob.vercel-storage.com/")) {
+      try {
+        await blobDel(existing.image, {
+          token: process.env.BLOB_READ_WRITE_TOKEN, // jika project blob kamu butuh token
+        });
+      } catch (e) {
+        console.warn("Blob delete failed (ignored):", e?.message || e);
       }
-
-      await Destinations.destroy({
-        where: {
-          id: destination.id,
-        },
-      });
-
-      return res
-        .status(200)
-        .json({ message: "Destination deleted successfully" });
-    } else {
-      return res
-        .status(403)
-        .json({ message: "Akses ditolak, Anda tidak memiliki izin" });
     }
+
+    await prisma.destination.delete({ where: { uuid: req.params.id } });
+    return res.status(200).json({ message: "Destination deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("deleteDestinations (Prisma) error:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };

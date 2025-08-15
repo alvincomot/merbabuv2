@@ -1,117 +1,90 @@
-import User from "../models/UserModel.js";
+import prisma from "../config/prisma.js";
 import argon2 from "argon2";
+import { randomUUID } from "crypto";
 
-export const getUsers = async (req, res) => {
+// GET /users
+export const getUsers = async (_req, res) => {
   try {
-    const response = await User.findAll({
-      attributes: ["uuid", "name", "email", "role", "createdAt"],
+    const users = await prisma.user.findMany({
+      select: { uuid: true, name: true, email: true, role: true, createdAt: true },
+      orderBy: { createdAt: "desc" },
     });
-    res.status(200).json(response);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(200).json(users);
+  } catch (e) {
+    console.error("getUsers", e);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
+// GET /users/:id (uuid)
 export const getUserById = async (req, res) => {
   try {
-    const response = await User.findOne({
-      attributes: ["uuid", "name", "email", "role"],
-      where: {
-        uuid: req.params.id,
-      },
+    const user = await prisma.user.findUnique({
+      where: { uuid: req.params.id },
+      select: { uuid: true, name: true, email: true, role: true, createdAt: true },
     });
-    res.status(200).json(response);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.status(200).json(user);
+  } catch (e) {
+    console.error("getUserById", e);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
+// POST /users  (admin)
 export const createUser = async (req, res) => {
-  const { name, email, password, confirmPassword, role } = req.body;
-  if (password !== confirmPassword)
-    return res
-      .status(400)
-      .json({ message: "Password dan Konfirmasi Password tidak cocok" });
-  const hashPassword = await argon2.hash(password);
   try {
-    const newUser = await User.create({
-      name: name,
-      email: email,
-      password: hashPassword,
-      role: role,
-    });
-
-    res.status(201).json({
-      message: "User berhasil dibuat",
-      user: newUser,
-    });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
-export const updateUser = async (req, res) => {
-  const user = await User.findOne({
-    where: {
-      uuid: req.params.id,
-    },
-  });
-  if (!user) return res.status(404).json({ message: "User tidak ditemukan" });
-
-  const { name, email, password, confirmPassword, role } = req.body;
-  let hashPassword;
-
-  if (password && password.length > 0) {
-    if (password !== confirmPassword) {
-      return res
-        .status(400)
-        .json({ message: "Password dan Konfirmasi Password tidak cocok" });
+    const { name, email, password, role } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "Field wajib diisi" });
     }
-    hashPassword = await argon2.hash(password);
-  } else {
-    hashPassword = user.password;
-  }
+    const exists = await prisma.user.findUnique({ where: { email } });
+    if (exists) return res.status(409).json({ message: "Email sudah terpakai" });
 
-  try {
-    await User.update(
-      {
-        name: name,
-        email: email,
-        password: hashPassword,
-        role: role,
-      },
-      {
-        where: {
-          id: user.id,
-        },
-      }
-    );
-
-    const updatedUser = await User.findByPk(user.id, {
-      attributes: ["uuid", "name", "email", "role", "createdAt", "updatedAt"],
+    const hash = await argon2.hash(password);
+    const user = await prisma.user.create({
+      data: { uuid: randomUUID(), name, email, password: hash, role: role || "user" },
+      select: { uuid: true, name: true, email: true, role: true },
     });
-
-    res.status(200).json(updatedUser);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(201).json({ message: "User dibuat", user });
+  } catch (e) {
+    console.error("createUser", e);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
-export const deleteUser = async (req, res) => {
-  const user = await User.findOne({
-    where: {
-      uuid: req.params.id,
-    },
-  });
-  if (!user) return res.status(404).json({ message: "User not found" });
+// PATCH /users/:id  (admin)
+export const updateUser = async (req, res) => {
   try {
-    await User.destroy({
-      where: {
-        id: user.id,
-      },
+    const { name, email, role, password } = req.body;
+    const data = {
+      name: name ?? undefined,
+      email: email ?? undefined,
+      role: role ?? undefined,
+    };
+    if (password) data.password = await argon2.hash(password);
+
+    const updated = await prisma.user.update({
+      where: { uuid: req.params.id },
+      data,
+      select: { uuid: true, name: true, email: true, role: true },
     });
-    res.status(200).json({ message: "User deleted" });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(200).json({ message: "User diperbarui", user: updated });
+  } catch (e) {
+    console.error("updateUser", e);
+    if (e.code === "P2025") return res.status(404).json({ message: "User not found" });
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// DELETE /users/:id (admin)
+export const deleteUser = async (req, res) => {
+  try {
+    await prisma.user.delete({ where: { uuid: req.params.id } });
+    res.status(200).json({ message: "User dihapus" });
+  } catch (e) {
+    console.error("deleteUser", e);
+    if (e.code === "P2025") return res.status(404).json({ message: "User not found" });
+    res.status(500).json({ message: "Internal server error" });
   }
 };

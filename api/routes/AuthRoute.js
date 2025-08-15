@@ -1,11 +1,11 @@
-import express from 'express';
-import {login, logout, Me, register} from "../controllers/Auth.js"
+import { Router } from "express";
+import { getMe, Register, Login, LogOut } from "../controllers/Auth.js";
 
-const router = express.Router();
+const router = Router();
 
-router.get('/me', Me);
-router.post('/register', express.json(), register);
-router.post('/login', express.json(), login);
-router.delete('/logout', logout);
+router.get("/me", getMe);
+router.post("/register", Register);
+router.post("/login", Login);
+router.delete("/logout", LogOut); // boleh POST juga
 
 export default router;

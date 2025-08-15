@@ -1,29 +1,32 @@
 import multer from "multer";
-import path from "path";
+import { put } from "@vercel/blob";
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "public/images");
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname);
-    cb(null, uniqueName);
-  },
-});
-
-const upload = multer({
-  storage: storage,
-  fileFilter: (req, file, cb) => {
-    const fileTypes = /png|jpg|jpeg/;
-    const mimeType = fileTypes.test(file.mimetype);
-    const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
-
-    if (mimeType && extname) {
-      return cb(null, true);
-    }
-    cb("Error: Hanya file gambar png,jpg, dan jpeg yang diperbolehkan!");
-  },
+// simpan file di memori dulu
+export const upload = multer({
+  storage: multer.memoryStorage(),
   limits: { fileSize: 35 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const ok = /png|jpg|jpeg/i.test(file.mimetype);
+    ok ? cb(null, true) : cb(new Error("Hanya png/jpg/jpeg"));
+  },
 });
 
-export default upload;
+export const uploadToBlob = async (req, res, next) => {
+  try {
+    if (!req.file) return next();
+
+    const objectName = `images/${Date.now()}-${(req.file.originalname || "file").replace(/\s+/g,"_")}`;
+
+    const { url } = await put(objectName, req.file.buffer, {
+      access: "public",
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+      contentType: req.file.mimetype,
+    });
+
+    req.fileUrl = url;
+    next();
+  } catch (err) {
+    console.error("uploadToBlob error:", err);
+    res.status(500).json({ message: "Upload gagal" });
+  }
+};

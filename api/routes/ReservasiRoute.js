@@ -1,20 +1,21 @@
-// file: backend/routes/ReservasiRoute.js
-
-import express from 'express';
+import { Router } from "express";
+import { verifyUser, adminOnly } from "../middleware/AuthUser.js";
+import { upload, uploadToBlob } from "../middleware/UploadMiddleware.js";
 import {
-    getLayananReservasi,
-    createLayananReservasi,
-    updateLayananReservasi,
-    deleteLayananReservasi
+  getReservasi,
+  getReservasiById,
+  createReservasi,
+  updateReservasi,
+  deleteReservasi,
 } from "../controllers/ReservasiController.js";
-import { verifyUser, adminOnly } from '../middleware/AuthUser.js';
-import upload from '../middleware/UploadMiddleware.js';
 
-const router = express.Router();
+const router = Router();
 
-router.get('/reservasi', getLayananReservasi);
-router.post('/reservasi', verifyUser, adminOnly, upload.single('image'), createLayananReservasi);
-router.patch('/reservasi/:id', verifyUser, adminOnly, upload.single('image'), updateLayananReservasi);
-router.delete('/reservasi/:id', verifyUser, adminOnly, deleteLayananReservasi);
+router.get("/", getReservasi);
+router.get("/:id", getReservasiById);
+
+router.post("/", verifyUser, adminOnly, upload.single("image"), uploadToBlob, createReservasi);
+router.patch("/:id", verifyUser, adminOnly, upload.single("image"), uploadToBlob, updateReservasi);
+router.delete("/:id", verifyUser, adminOnly, deleteReservasi);
 
 export default router;

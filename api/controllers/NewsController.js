@@ -1,102 +1,96 @@
-import News from "../models/NewsModel.js";
-import User from "../models/UserModel.js";
-import path from "path";
-import fs from "fs";
+import prisma from "../config/prisma.js";
 
-// Mengambil semua berita (Publik)
-export const getNews = async (req, res) => {
+const apiBase = (req) =>
+  process.env.BACKEND_URL?.replace(/\/$/, "") ||
+  `${req.protocol}://${req.get("host")}/api`;
+
+const toImageUrl = (req, image) => {
+  if (!image) return null;
+  if (/^https?:\/\//i.test(image)) return image;
+  return `${apiBase(req)}/images/${image}`;
+};
+
+// GET /news
+export const getNews = async (_req, res) => {
   try {
-    const response = await News.findAll({
-      attributes: ["id", "uuid", "judul", "image", "konten", "createdAt"],
-      include: [{ model: User, attributes: ["name"] }],
-      order: [["createdAt", "DESC"]],
+    const rows = await prisma.news.findMany({
+      select: { uuid: true, judul: true, konten: true, image: true, createdAt: true, userId: true },
+      orderBy: { createdAt: "desc" },
     });
-    res.status(200).json(response);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(200).json(rows.map(n => ({ ...n, image: toImageUrl(_req, n.image) })));
+  } catch (e) {
+    console.error("getNews", e);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// Mengambil satu berita (Publik)
+// GET /news/:id
 export const getNewsById = async (req, res) => {
   try {
-    const newsItem = await News.findOne({
-      where: { id: req.params.id },
-      include: [{ model: User, attributes: ["name"] }],
+    const n = await prisma.news.findUnique({
+      where: { uuid: req.params.id },
+      select: { uuid: true, judul: true, konten: true, image: true, createdAt: true, userId: true },
     });
-    if (!newsItem)
-      return res.status(404).json({ message: "Berita tidak ditemukan" });
-    res.status(200).json(newsItem);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    if (!n) return res.status(404).json({ message: "News not found" });
+    res.status(200).json({ ...n, image: toImageUrl(req, n.image) });
+  } catch (e) {
+    console.error("getNewsById", e);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// Membuat berita baru (Admin)
+// POST /news  (admin)
 export const createNews = async (req, res) => {
-  if (!req.file)
-    return res.status(400).json({ message: "File gambar wajib diunggah." });
-
-  const { judul, konten } = req.body;
-  const fileName = req.file.filename;
-  const imageUrl = `${req.protocol}://${req.get("host")}/images/${fileName}`;
-
   try {
-    const newNews = await News.create({
-      judul: judul,
-      konten: konten,
-      image: imageUrl,
+    const { judul, konten } = req.body;
+    const image = req.fileUrl ?? null;
+    const news = await prisma.news.create({
+      data: {
+        uuid: crypto.randomUUID(),
+        judul,
+        konten,
+        image,
+        userId: req.userId ?? null,
+      },
+      select: { uuid: true, judul: true, konten: true, image: true, createdAt: true },
     });
-    res.status(201).json({ message: "Berita berhasil dibuat", news: newNews });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(201).json({ message: "News dibuat", news: { ...news, image: toImageUrl(req, news.image) } });
+  } catch (e) {
+    console.error("createNews", e);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// Mengupdate berita (Admin)
+// PATCH /news/:id  (admin)
 export const updateNews = async (req, res) => {
   try {
-    const newsItem = await News.findOne({ where: { id: req.params.id } });
-    if (!newsItem)
-      return res.status(404).json({ message: "Berita tidak ditemukan" });
-
-    let imageUrl = newsItem.image;
-    if (req.file) {
-      if (newsItem.image) {
-        const oldImageName = newsItem.image.split("/images/")[1];
-        const oldImagePath = path.join("public/images", oldImageName);
-        if (fs.existsSync(oldImagePath)) fs.unlinkSync(oldImagePath);
-      }
-      imageUrl = `${req.protocol}://${req.get("host")}/images/${req.file.filename}`;
-    }
+    const existing = await prisma.news.findUnique({ where: { uuid: req.params.id }, select: { image: true } });
+    if (!existing) return res.status(404).json({ message: "News not found" });
 
     const { judul, konten } = req.body;
-    await newsItem.update({ judul, konten, image: imageUrl });
+    const image = req.fileUrl ?? existing.image;
 
-    res
-      .status(200)
-      .json({ message: "Berita berhasil diperbarui", news: newsItem });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    const news = await prisma.news.update({
+      where: { uuid: req.params.id },
+      data: { judul: judul ?? undefined, konten: konten ?? undefined, image },
+      select: { uuid: true, judul: true, konten: true, image: true, createdAt: true },
+    });
+
+    res.status(200).json({ message: "News diperbarui", news: { ...news, image: toImageUrl(req, news.image) } });
+  } catch (e) {
+    console.error("updateNews", e);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// Menghapus berita (Admin)
+// DELETE /news/:id  (admin)
 export const deleteNews = async (req, res) => {
   try {
-    const newsItem = await News.findOne({ where: { id: req.params.id } });
-    if (!newsItem)
-      return res.status(404).json({ message: "Berita tidak ditemukan" });
-
-    if (newsItem.image) {
-      const oldImageName = newsItem.image.split("/images/")[1];
-      const oldImagePath = path.join("public/images", oldImageName);
-      if (fs.existsSync(oldImagePath)) fs.unlinkSync(oldImagePath);
-    }
-
-    await newsItem.destroy();
-    res.status(200).json({ message: "Berita berhasil dihapus" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    await prisma.news.delete({ where: { uuid: req.params.id } });
+    res.status(200).json({ message: "News dihapus" });
+  } catch (e) {
+    console.error("deleteNews", e);
+    if (e.code === "P2025") return res.status(404).json({ message: "News not found" });
+    res.status(500).json({ message: "Internal server error" });
   }
 };

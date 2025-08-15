@@ -1,20 +1,24 @@
-import express from 'express';
+// api/routes/DestinationsRoute.js
+import { Router } from "express";
+import { verifyUser, adminOnly } from "../middleware/AuthUser.js";
+import { upload, uploadToBlob } from "../middleware/UploadMiddleware.js";
 import {
-    getDestinations,
-    getDestinationsById,
-    createDestinations,
-    updateDestinations,
-    deleteDestinations
+  getDestinations,
+  getDestinationsById,
+  createDestinations,
+  updateDestinations,
+  deleteDestinations,
 } from "../controllers/DestinationsController.js";
-import { verifyUser, adminOnly } from '../middleware/AuthUser.js';
-import upload from "../middleware/UploadMiddleware.js";
 
-const router = express.Router();
+const router = Router();
 
-router.get('/Destinations', getDestinations);
-router.get('/Destinations/:id', getDestinationsById);
-router.post('/destinations', verifyUser, adminOnly, upload.single('image'), createDestinations);
-router.patch('/destinations/:id', verifyUser, adminOnly, upload.single('image'), updateDestinations);
-router.delete('/Destinations/:id',verifyUser, adminOnly, deleteDestinations);
+// publik
+router.get("/", getDestinations);
+router.get("/:id", getDestinationsById);
+
+// butuh login/admin + upload ke Blob
+router.post("/", verifyUser, adminOnly, upload.single("image"), uploadToBlob, createDestinations);
+router.patch("/:id", verifyUser, adminOnly, upload.single("image"), uploadToBlob, updateDestinations);
+router.delete("/:id", verifyUser, adminOnly, deleteDestinations);
 
 export default router;
