@@ -3,6 +3,7 @@ import api from "@/api/axios";
 
 const pickErr = (e) => e?.response?.data?.message || e?.message || "Error";
 
+/** ===== Thunks ===== */
 export const fetchDestinations = createAsyncThunk(
   "destinations/fetchAll",
   async (_, { rejectWithValue }) => {
@@ -33,7 +34,7 @@ export const createDestination = createAsyncThunk(
     try {
       // payload boleh FormData (image)
       const { data } = await api.post("/destinations", payload);
-      return data.destination; // lihat controller
+      return data.destination; // sesuai controller
     } catch (e) {
       return rejectWithValue(pickErr(e));
     }
@@ -64,24 +65,88 @@ export const deleteDestination = createAsyncThunk(
   }
 );
 
+/** ===== Slice ===== */
+const initialState = {
+  items: [],
+  current: null,
+  status: "idle",      // untuk fetch list/detail
+  formStatus: "idle",  // untuk create/update form
+  error: null,
+};
+
 const destinationSlice = createSlice({
   name: "destinations",
-  initialState: { items: [], current: null, status: "idle", error: null },
-  reducers: { clearCurrent: (s) => { s.current = null; } },
+  initialState,
+  reducers: {
+    clearCurrent: (s) => {
+      s.current = null;
+    },
+    resetAddEditStatus: (s) => {
+      s.formStatus = "idle";
+      s.error = null;
+    },
+  },
   extraReducers: (b) => {
     b
-      .addCase(fetchDestinations.pending, (s) => { s.status = "loading"; })
-      .addCase(fetchDestinations.fulfilled, (s, a) => { s.status = "succeeded"; s.items = a.payload; s.error = null; })
-      .addCase(fetchDestinations.rejected, (s, a) => { s.status = "failed"; s.error = a.payload; })
+      // ===== fetch list
+      .addCase(fetchDestinations.pending, (s) => {
+        s.status = "loading";
+      })
+      .addCase(fetchDestinations.fulfilled, (s, a) => {
+        s.status = "succeeded";
+        s.items = a.payload;
+        s.error = null;
+      })
+      .addCase(fetchDestinations.rejected, (s, a) => {
+        s.status = "failed";
+        s.error = a.payload;
+      })
 
-      .addCase(fetchDestinationById.fulfilled, (s, a) => { s.current = a.payload; s.error = null; })
-      .addCase(fetchDestinationById.rejected, (s, a) => { s.error = a.payload; })
+      // ===== fetch by id
+      .addCase(fetchDestinationById.pending, (s) => {
+        // boleh pakai status umum juga, tapi tidak wajib
+        s.status = "loading";
+      })
+      .addCase(fetchDestinationById.fulfilled, (s, a) => {
+        s.status = "succeeded";
+        s.current = a.payload;
+        s.error = null;
+      })
+      .addCase(fetchDestinationById.rejected, (s, a) => {
+        s.status = "failed";
+        s.error = a.payload;
+      })
 
-      .addCase(createDestination.fulfilled, (s, a) => { s.items.unshift(a.payload); s.error = null; })
+      // ===== create
+      .addCase(createDestination.pending, (s) => {
+        s.formStatus = "loading";
+      })
+      .addCase(createDestination.fulfilled, (s, a) => {
+        s.formStatus = "succeeded";
+        s.items.unshift(a.payload);
+        s.error = null;
+      })
+      .addCase(createDestination.rejected, (s, a) => {
+        s.formStatus = "failed";
+        s.error = a.payload;
+      })
+
+      // ===== update
+      .addCase(updateDestination.pending, (s) => {
+        s.formStatus = "loading";
+      })
       .addCase(updateDestination.fulfilled, (s, a) => {
+        s.formStatus = "succeeded";
         s.items = s.items.map((x) => (x.uuid === a.payload.uuid ? a.payload : x));
         if (s.current?.uuid === a.payload.uuid) s.current = a.payload;
+        s.error = null;
       })
+      .addCase(updateDestination.rejected, (s, a) => {
+        s.formStatus = "failed";
+        s.error = a.payload;
+      })
+
+      // ===== delete
       .addCase(deleteDestination.fulfilled, (s, a) => {
         s.items = s.items.filter((x) => x.uuid !== a.payload);
         if (s.current?.uuid === a.payload) s.current = null;
@@ -89,5 +154,5 @@ const destinationSlice = createSlice({
   },
 });
 
-export const { clearCurrent } = destinationSlice.actions;
+export const { clearCurrent, resetAddEditStatus } = destinationSlice.actions;
 export default destinationSlice.reducer;
