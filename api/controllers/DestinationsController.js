@@ -1,5 +1,6 @@
 // /api/controllers/DestinationsController.js
 import prisma from "../config/prisma.js";
+import { withTimeout } from "../utils/withTimeout.js";
 import { del as blobDel } from "@vercel/blob";
 
 const apiBase = (req) =>
@@ -14,16 +15,19 @@ const toImageUrl = (req, image) => {
 
 export const getDestinations = async (req, res) => {
   try {
-    const rows = await prisma.destination.findMany({
-      select: { uuid: true, name: true, description: true, image: true, location: true },
-      orderBy: { name: "asc" },
-    });
+    const rows = await withTimeout(
+      prisma.destination.findMany({
+        select: { uuid: true, name: true, description: true, image: true, location: true },
+        orderBy: { name: "asc" },
+      })
+    );
 
     const data = rows.map((d) => ({ ...d, image: toImageUrl(req, d.image) }));
     return res.status(200).json(data);
   } catch (error) {
     console.error("getDestinations (Prisma) error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    const msg = /timeout/i.test(error.message) ? "Database timeout" : "Internal server error";
+    return res.status(500).json({ message: msg});
   }
 };
 
