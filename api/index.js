@@ -1,9 +1,10 @@
 // api/index.js (rapi & siap Vercel)
 import express from "express";
 import serverless from "serverless-http";
+import { withTimeout } from "./utils/withTimeout.js";
 import cors from "cors";
 import session from "express-session";
-import prisma from "./config/prisma.js"; // pastikan path sesuai
+import prisma from "./config/prisma.js";
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import dotenv from "dotenv";
 import path from "path";
@@ -84,6 +85,18 @@ app.use("/destinations", DestinationsRoute);
 app.use("/reservasi", ReservasiRoute);
 app.use("/news", NewsRoute);
 
-app.get("/healthz", (_req, res) => res.json({ ok: true }));
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true, ts: Date.now() });
+});
+
+app.get('/api/dbcheck', async (req, res) => {
+  try {
+    await withTimeout(prisma.$queryRaw`SELECT 1`, 5000, 'dbcheck');
+    res.json({ db: 'ok' });
+  } catch (e) {
+    console.error('dbcheck failed:', e);
+    res.status(500).json({ db: 'fail', error: String(e?.message || e) });
+  }
+});
 
 export default serverless(app);
