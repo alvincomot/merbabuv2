@@ -46,7 +46,7 @@ if (process.env.NODE_ENV === "production") {
   console.log("✅ Connected to database with Prisma");
 } else {
   console.log("Running in development with MySQL + Sequelize");
-  const { default: sequelize } = await import("./config/config.js"); // ini file koneksi Sequelize-mu
+  const { default: sequelize } = await import("./config/Database.js"); // ini file koneksi Sequelize-mu
   await sequelize.authenticate();
   console.log("✅ MySQL connection has been established successfully.");
 }
