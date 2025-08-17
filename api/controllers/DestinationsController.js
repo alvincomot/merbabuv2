@@ -1,3 +1,4 @@
+// /api/controllers/DestinationsController.js
 import prisma from "../config/prisma.js";
 import { del as blobDel } from "@vercel/blob";
 
