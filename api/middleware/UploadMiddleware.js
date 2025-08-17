@@ -1,37 +1,44 @@
-import express from "express";
-import {
-  getReservasi,
-  getReservasiById,
-  createReservasi,
-  updateReservasi,
-  deleteReservasi,
-} from "../controllers/ReservasiController.js";
-import { verifyUser, adminOnly } from "../middleware/AuthUser.js";
-import { upload, makeUploadToBlob } from "../middleware/UploadMiddleware.js";
+// api/middleware/UploadMiddleware.js
+import multer from "multer";
+import { put } from "@vercel/blob";
 
-const router = express.Router();
-const uploadToBlobReservasi = makeUploadToBlob("reservasi");
+// Simpan file di memori dulu (wajib untuk upload ke Blob)
+export const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 35 * 1024 * 1024 }, // 35 MB
+  fileFilter: (req, file, cb) => {
+    const ok = /png|jpg|jpeg/i.test(file.mimetype);
+    ok ? cb(null, true) : cb(new Error("Hanya png/jpg/jpeg"));
+  },
+});
 
-router.get("/reservasi", getReservasi);
-router.get("/reservasi/:id", getReservasiById);
-router.post(
-  "/reservasi",
-  verifyUser, adminOnly,
-  upload.single("image"),
-  uploadToBlobReservasi,
-  createReservasi
-);
-router.patch(
-  "/reservasi/:id",
-  verifyUser, adminOnly,
-  upload.single("image"),
-  uploadToBlobReservasi,
-  updateReservasi
-);
-router.delete(
-  "/reservasi/:id",
-  verifyUser, adminOnly,
-  deleteReservasi
-);
+// Middleware untuk mengunggah buffer ke Vercel Blob lalu
+// menaruh URL publiknya di req.fileUrl
+export const uploadToBlob = async (req, res, next) => {
+  try {
+    if (!req.file) return next();
 
-export default router;
+    const safeName = (req.file.originalname || "file")
+      .replace(/\s+/g, "_")
+      .replace(/[^a-zA-Z0-9._-]/g, "");
+
+    const objectName = `images/${Date.now()}-${safeName}`;
+
+    const { url } = await put(objectName, req.file.buffer, {
+      access: "public",
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+      contentType: req.file.mimetype,
+    });
+
+    req.fileUrl = url;
+    next();
+  } catch (err) {
+    console.error("uploadToBlob error:", err);
+    res.status(500).json({ message: "Upload gagal" });
+  }
+};
+
+// OPTIONAL: alias agar import lama `makeUploadToBlob` tetap jalan
+export const makeUploadToBlob = uploadToBlob;
+
+export default upload;
