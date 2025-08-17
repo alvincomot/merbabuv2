@@ -1,37 +1,32 @@
-import express from "express";
-import {
-  getReservasi,
-  getReservasiById,
-  createReservasi,
-  updateReservasi,
-  deleteReservasi,
-} from "../controllers/ReservasiController.js";
-import { verifyUser, adminOnly } from "../middleware/AuthUser.js";
-import { upload, makeUploadToBlob } from "../middleware/UploadMiddleware.js";
+import multer from "multer";
+import { put } from "@vercel/blob";
 
-const router = express.Router();
-const uploadToBlobReservasi = makeUploadToBlob("reservasi");
+// Configure multer to store files in memory so they can be uploaded to Vercel Blob
+const storage = multer.memoryStorage();
+export const upload = multer({ storage });
 
-router.get("/reservasi", getReservasi);
-router.get("/reservasi/:id", getReservasiById);
-router.post(
-  "/reservasi",
-  verifyUser, adminOnly,
-  upload.single("image"),
-  uploadToBlobReservasi,
-  createReservasi
-);
-router.patch(
-  "/reservasi/:id",
-  verifyUser, adminOnly,
-  upload.single("image"),
-  uploadToBlobReservasi,
-  updateReservasi
-);
-router.delete(
-  "/reservasi/:id",
-  verifyUser, adminOnly,
-  deleteReservasi
-);
+/**
+ * Create middleware that uploads the file in `req.file` to Vercel Blob and
+ * stores the resulting public URL in `req.fileUrl`.
+ *
+ * @param {string} prefix Optional path prefix inside the blob store.
+ */
+export const makeUploadToBlob = (prefix = "") => async (req, _res, next) => {
+  if (!req.file) return next();
 
-export default router;
+  try {
+    const filename = prefix ? `${prefix}/${req.file.originalname}` : req.file.originalname;
+    const { url } = await put(filename, req.file.buffer, {
+      access: "public",
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+    });
+    req.fileUrl = url;
+    return next();
+  } catch (err) {
+    console.error("uploadToBlob error:", err);
+    return next(err);
+  }
+};
+
+// Default middleware without prefix
+export const uploadToBlob = makeUploadToBlob();
