@@ -84,4 +84,6 @@ app.use("/destinations", DestinationsRoute);
 app.use("/reservasi", ReservasiRoute);
 app.use("/news", NewsRoute);
 
+app.get("/healthz", (_req, res) => res.json({ ok: true }));
+
 export default serverless(app);
