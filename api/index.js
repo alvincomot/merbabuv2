@@ -78,10 +78,10 @@ app.use(
 );
 // ====== END SESSION ======
 
-app.use("/api/auth", AuthRoute);
-app.use("/api/users", UserRoute);
-app.use("/api/destinations", DestinationsRoute);
-app.use("/api/reservasi", ReservasiRoute);
-app.use("/api/news", NewsRoute);
+app.use("/auth", AuthRoute);
+app.use("/users", UserRoute);
+app.use("/destinations", DestinationsRoute);
+app.use("/reservasi", ReservasiRoute);
+app.use("/news", NewsRoute);
 
 export default serverless(app);
