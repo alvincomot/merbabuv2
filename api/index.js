@@ -1,5 +1,6 @@
 // api/index.js (rapi & siap Vercel)
 import express from "express";
+import serverless from "serverless-http";
 import cors from "cors";
 import session from "express-session";
 import prisma from "./config/prisma.js"; // pastikan path sesuai
@@ -77,10 +78,10 @@ app.use(
 );
 // ====== END SESSION ======
 
-app.use("/auth", AuthRoute);
-app.use("/users", UserRoute);
-app.use("/destinations", DestinationsRoute);
-app.use("/reservasi", ReservasiRoute);
-app.use("/news", NewsRoute);
+app.use("/api/auth", AuthRoute);
+app.use("/api/users", UserRoute);
+app.use("/api/destinations", DestinationsRoute);
+app.use("/api/reservasi", ReservasiRoute);
+app.use("/api/news", NewsRoute);
 
-export default app;
+export default serverless(app);
