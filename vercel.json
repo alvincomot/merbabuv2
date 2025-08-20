@@ -2,11 +2,7 @@
   "version": 2,
   "functions": {
     "api/index.js": {
-      "runtime": "nodejs20",
-      "includeFiles": [
-        "prisma/**",
-        "node_modules/.prisma/**"
-      ]
+      "includeFiles": "node_modules/.prisma/**"
     }
   },
   "routes": [
