@@ -1,7 +1,7 @@
 {
   "version": 2,
   "framework": "vite",
-  "buildCommand": "prisma migrate deploy && vite build",
+  "buildCommand": "prisma db push && vite build",
   "outputDirectory": "dist",
   "functions": {
     "api/index.js": {
