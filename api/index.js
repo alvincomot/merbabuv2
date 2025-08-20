@@ -4,17 +4,17 @@ import serverless from "serverless-http";
 import { withTimeout } from "./utils/withTimeout.js";
 import cors from "cors";
 import session from "express-session";
-import prisma from "./config/prisma.js";
+import prisma from "../server/config/prisma.js";
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import dotenv from "dotenv";
 dotenv.config();
 
 // routes
-import UserRoute from "./routes/UserRoute.js";
-import DestinationsRoute from "./routes/DestinationsRoute.js";
-import AuthRoute from "./routes/AuthRoute.js";
-import NewsRoute from "./routes/NewsRoute.js";
-import ReservasiRoute from "./routes/ReservasiRoute.js";
+import UserRoute from "../server/routes/UserRoute.js";
+import DestinationsRoute from "../server/routes/DestinationsRoute.js";
+import AuthRoute from "../server/routes/AuthRoute.js";
+import NewsRoute from "../server/routes/NewsRoute.js";
+import ReservasiRoute from "../server/routes/ReservasiRoute.js";
 
 const app = express();
 
