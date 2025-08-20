@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from "../src/api/axios"; // pastikan api set { baseURL: import.meta.env.VITE_API_URL || "/api", withCredentials: true }
+import api from "@/api/axios"; // pastikan api set { baseURL: import.meta.env.VITE_API_URL || "/api", withCredentials: true }
 
 const initialState = {
   user: null,
