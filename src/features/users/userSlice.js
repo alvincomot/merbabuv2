@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from "../src/api/axios";
+import api from "./src/api/axios";
 
 const pickErr = (e) => e?.response?.data?.message || e?.message || "Error";
 
