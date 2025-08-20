@@ -1,3 +1,4 @@
+// /api/routes/UserRoute.js
 import { Router } from "express";
 import { verifyUser, adminOnly } from "../middleware/AuthUser.js";
 import {
@@ -10,6 +11,7 @@ import {
 
 const router = Router();
 
+// Base dari index.js: /api/users
 router.get("/", verifyUser, adminOnly, getUsers);
 router.get("/:id", verifyUser, adminOnly, getUserById);
 router.post("/", verifyUser, adminOnly, createUser);

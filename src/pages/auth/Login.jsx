@@ -11,10 +11,8 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // dari authSlice: status (loading/succeeded/failed) utk login, error utk pesan error
   const { user, isAuthenticated, status, error } = useSelector((s) => s.auth);
 
-  // target redirect (jika sempat diarahkan dari ProtectedRoute)
   const redirectTo = useMemo(
     () => location.state?.from?.pathname || (user?.role === "admin" ? "/dashboard" : "/"),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -22,7 +20,7 @@ const Login = () => {
   );
 
   useEffect(() => {
-    // bersihkan state auth saat membuka halaman login
+    // Bersihkan state auth ketika membuka halaman login
     dispatch(resetAuth());
   }, [dispatch]);
 
@@ -34,7 +32,7 @@ const Login = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (status === "loading") return; // cegah double submit
+    if (status === "loading") return;
     dispatch(loginUser({ email, password }));
   };
 

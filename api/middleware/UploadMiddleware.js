@@ -2,22 +2,27 @@
 import multer from "multer";
 import { put } from "@vercel/blob";
 
-// Simpan file di memori dulu (wajib untuk upload ke Blob)
+// Simpan file di memori (dibutuhkan untuk upload ke Blob)
 export const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 35 * 1024 * 1024 }, // 35 MB
+  limits: { fileSize: 4 * 1024 * 1024 }, // max 4 MB (aman di Vercel)
   fileFilter: (req, file, cb) => {
     const ok = /png|jpg|jpeg/i.test(file.mimetype);
     ok ? cb(null, true) : cb(new Error("Hanya png/jpg/jpeg"));
   },
 });
 
-// Middleware untuk mengunggah buffer ke Vercel Blob lalu
-// menaruh URL publiknya di req.fileUrl
+// Middleware untuk mengunggah buffer ke Vercel Blob
+// lalu menyimpan URL publiknya di req.fileUrl
 export const uploadToBlob = async (req, res, next) => {
   try {
     if (!req.file) return next();
 
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      throw new Error("BLOB_READ_WRITE_TOKEN is not set");
+    }
+
+    // nama file aman
     const safeName = (req.file.originalname || "file")
       .replace(/\s+/g, "_")
       .replace(/[^a-zA-Z0-9._-]/g, "");
@@ -28,9 +33,10 @@ export const uploadToBlob = async (req, res, next) => {
       access: "public",
       token: process.env.BLOB_READ_WRITE_TOKEN,
       contentType: req.file.mimetype,
+      cacheControl: "public, max-age=31536000, immutable", // cache CDN
     });
 
-    req.fileUrl = url;
+    req.fileUrl = url; // dipakai di controller
     next();
   } catch (err) {
     console.error("uploadToBlob error:", err);

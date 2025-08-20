@@ -10,7 +10,7 @@ const Register = () => {
   const [confPassword, setConfPassword] = useState("");
 
   const dispatch = useDispatch();
-  const { formStatus, error } = useSelector((state) => state.auth);
+  const { status, error } = useSelector((state) => state.auth);
 
   useEffect(() => {
     dispatch(resetAuth());
@@ -18,18 +18,17 @@ const Register = () => {
 
   const handleRegister = (e) => {
     e.preventDefault();
-    if (formStatus === "loading") return;
+    if (status === "loading") return;
 
     if (password !== confPassword) {
       alert("Password dan Konfirmasi Password tidak cocok!");
       return;
     }
 
-    // sesuaikan dengan backend kamu (kamu sebelumnya kirim confPassword)
     dispatch(registerUser({ name, email, password, confPassword }));
   };
 
-  if (formStatus === "succeeded") {
+  if (status === "succeeded") {
     return (
       <section className="bg-gray-50">
         <div className="container flex items-center justify-center min-h-screen px-6 mx-auto">
@@ -64,7 +63,7 @@ const Register = () => {
           </div>
           <h2 className="mt-3 text-2xl font-semibold text-center text-gray-800">Create Account</h2>
 
-          {formStatus === "failed" && error && (
+          {status === "failed" && error && (
             <p className="mt-4 text-center text-sm text-red-600 bg-red-100 p-3 rounded-lg">
               {error}
             </p>
@@ -139,10 +138,10 @@ const Register = () => {
 
           <div className="mt-6">
             <button
-              disabled={formStatus === "loading"}
+              disabled={status === "loading"}
               className="w-full px-6 py-3 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 focus:outline-none focus:ring focus:ring-teal-300 focus:ring-opacity-50 disabled:bg-teal-400"
             >
-              {formStatus === "loading" ? "Registering..." : "Sign Up"}
+              {status === "loading" ? "Registering..." : "Sign Up"}
             </button>
 
             <div className="mt-6 text-center">
@@ -153,7 +152,7 @@ const Register = () => {
             </div>
           </div>
 
-          {formStatus === "failed" && error && (
+          {status === "failed" && error && (
             <p className="mt-4 text-center text-sm text-red-600 bg-red-100 p-3 rounded-lg">
               {error}
             </p>

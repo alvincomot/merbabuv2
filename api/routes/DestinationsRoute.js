@@ -1,5 +1,5 @@
-// api/routes/DestinationsRoute.js
-import express from "express";
+// /api/routes/DestinationsRoute.js
+import { Router } from "express";
 import { verifyUser, adminOnly } from "../middleware/AuthUser.js";
 import { upload, uploadToBlob } from "../middleware/UploadMiddleware.js";
 import {
@@ -10,14 +10,14 @@ import {
   deleteDestinations,
 } from "../controllers/DestinationsController.js";
 
-const router = express.Router();
+const router = Router();
 
-router.get("/destinations", getDestinations);
-router.get("/destinations/:id", getDestinationsById);
+// base from index.js: /api/destinations
+router.get("/", getDestinations);
+router.get("/:id", getDestinationsById);
 
-// urutan penting: upload.single(...) dulu, baru uploadToBlob, baru controller
 router.post(
-  "/destinations",
+  "/",
   verifyUser,
   adminOnly,
   upload.single("image"),
@@ -26,7 +26,7 @@ router.post(
 );
 
 router.patch(
-  "/destinations/:id",
+  "/:id",
   verifyUser,
   adminOnly,
   upload.single("image"),
@@ -34,6 +34,6 @@ router.patch(
   updateDestinations
 );
 
-router.delete("/destinations/:id", verifyUser, adminOnly, deleteDestinations);
+router.delete("/:id", verifyUser, adminOnly, deleteDestinations);
 
 export default router;

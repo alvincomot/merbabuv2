@@ -2,16 +2,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-/**
- * Satu-satunya sumber kebenaran untuk config aplikasi.
- * Tidak ada lagi opsi Sequelize/MySQL.
- */
 export const appConfig = {
-  nodeEnv: process.env.NODE_ENV || "production",
-
-  // Selalu Prisma
-  dbClient: "prisma",
-
   // URL DB yang dipakai Prisma
   databaseUrl: process.env.POSTGRES_URL,
 
@@ -28,7 +19,4 @@ export const appConfig = {
     secret: process.env.SESS_SECRET || "change-me",
     cookieName: process.env.SESS_NAME || "sid",
   },
-
-  // Guard timeout (ms) untuk query/HTTP internal
-  requestTimeoutMs: Number(process.env.REQUEST_TIMEOUT_MS || 8000),
 };

@@ -1,4 +1,4 @@
-// api/index.js (bersih, siap untuk Vercel)
+// /api/index.js
 import express from "express";
 import serverless from "serverless-http";
 import { withTimeout } from "./utils/withTimeout.js";
@@ -7,8 +7,7 @@ import session from "express-session";
 import prisma from "./config/prisma.js";
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
+dotenv.config();
 
 // routes
 import UserRoute from "./routes/UserRoute.js";
@@ -17,37 +16,29 @@ import AuthRoute from "./routes/AuthRoute.js";
 import NewsRoute from "./routes/NewsRoute.js";
 import ReservasiRoute from "./routes/ReservasiRoute.js";
 
-dotenv.config();
-
 const app = express();
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
+// ------ CORS ------
 const allowedOrigins = [
   "https://merbabuv2.vercel.app",
-  // tambahkan origin lain jika perlu (misalnya preview deployment Vercel)
 ];
+const isAllowed = (origin) =>
+  !origin ||
+  allowedOrigins.includes(origin) ||
+  /^https:\/\/.+\.vercel\.app$/i.test(origin);
 
-const isAllowed = (origin) => {
-  if (!origin) return true; // same-origin / server-to-server
-  if (allowedOrigins.includes(origin)) return true;
-  // allow preview deployments: https://*.vercel.app
-  if (/^https:\/\/.+\.vercel\.app$/i.test(origin)) return true;
-  return false;
-};
+app.use(
+  cors({
+    origin: (origin, cb) =>
+      isAllowed(origin) ? cb(null, true) : cb(new Error("Not allowed by CORS")),
+    credentials: true,
+  })
+);
 
-// CORS
-app.use(cors({
-  origin: (origin, cb) =>
-    isAllowed(origin) ? cb(null, true) : cb(new Error("Not allowed by CORS")),
-  credentials: true,
-}));
-
-app.use(express.json());
+app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public")));
 
-// ====== Prisma connect (production only) ======
+// ------ Prisma connect (opsional, kamu sudah handle di module prisma.js) ------
 (async () => {
   try {
     await prisma.$connect();
@@ -59,7 +50,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.set("trust proxy", 1);
 
-// ====== SESSION ======
+// ------ SESSION ------
 app.use(
   session({
     name: "sid",
@@ -69,37 +60,36 @@ app.use(
     proxy: true,
     cookie: {
       httpOnly: true,
-      secure: true, // wajib di Vercel (https)
+      secure: true,        // Vercel = https
       sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 hari
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     },
     store: new PrismaSessionStore(prisma, {
-      checkPeriod: 2 * 60 * 1000, // bersihkan session expired tiap 2 menit
+      checkPeriod: 2 * 60 * 1000,
       dbRecordIdIsSessionId: true,
     }),
   })
 );
 
-// ====== ROUTES ======
-app.use("/auth", AuthRoute);
-app.use("/users", UserRoute);
-app.use("/destinations", DestinationsRoute);
-app.use("/reservasi", ReservasiRoute);
-app.use("/news", NewsRoute);
+// ------ ROUTES (pakai prefix /api) ------
+app.use("/api/auth", AuthRoute);
+app.use("/api/users", UserRoute);
+app.use("/api/destinations", DestinationsRoute);
+app.use("/api/reservasi", ReservasiRoute);
+app.use("/api/news", NewsRoute);
 
-// ====== HEALTH CHECK ======
+// ------ HEALTH ------
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, ts: Date.now() });
 });
-
 app.get("/api/dbcheck", async (req, res) => {
   try {
     await withTimeout(prisma.$queryRaw`SELECT 1`, 5000, "dbcheck");
     res.json({ db: "ok" });
   } catch (e) {
-    console.error("dbcheck failed:", e);
     res.status(500).json({ db: "fail", error: String(e?.message || e) });
   }
 });
 
+// note: tidak perlu serve static dari sini; biarkan Vite handle
 export default serverless(app);

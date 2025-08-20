@@ -1,62 +1,68 @@
+// /src/features/reservasi/reservasiSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "@/api/axios";
 
 const pickErr = (e) => e?.response?.data?.message || e?.message || "Error";
 
-// GET /reservasi
+// GET /api/reservasi
 export const fetchReservasi = createAsyncThunk(
   "reservasi/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
       const { data } = await api.get("/reservasi");
-      return data; // array
+      return Array.isArray(data) ? data : [];
     } catch (e) {
       return rejectWithValue(pickErr(e));
     }
   }
 );
 
-// GET /reservasi/:id
+// GET /api/reservasi/:id
 export const fetchReservasiById = createAsyncThunk(
   "reservasi/fetchById",
   async (id, { rejectWithValue }) => {
     try {
       const { data } = await api.get(`/reservasi/${id}`);
-      return data; // object
+      return data ?? null;
     } catch (e) {
       return rejectWithValue(pickErr(e));
     }
   }
 );
 
-// POST /reservasi  (FormData atau JSON)
+// POST /api/reservasi  (FormData atau JSON)
 export const createReservasi = createAsyncThunk(
   "reservasi/create",
   async (payload, { rejectWithValue }) => {
     try {
-      const { data } = await api.post("/reservasi", payload);
-      // backend mengembalikan { reservasi: {...} }
-      return data.reservasi;
+      const isForm = typeof FormData !== "undefined" && payload instanceof FormData;
+      const { data } = await api.post("/reservasi", payload, {
+        headers: isForm ? undefined : { "Content-Type": "application/json" },
+      });
+      return data?.reservasi;
     } catch (e) {
       return rejectWithValue(pickErr(e));
     }
   }
 );
 
-// PATCH /reservasi/:id  <-- NOTE: param diganti ke { id, formData } agar cocok dg Dashboard.jsx
+// PATCH /api/reservasi/:id
 export const updateReservasi = createAsyncThunk(
   "reservasi/update",
   async ({ id, formData }, { rejectWithValue }) => {
     try {
-      const { data } = await api.patch(`/reservasi/${id}`, formData);
-      return data.reservasi;
+      const isForm = typeof FormData !== "undefined" && formData instanceof FormData;
+      const { data } = await api.patch(`/reservasi/${id}`, formData, {
+        headers: isForm ? undefined : { "Content-Type": "application/json" },
+      });
+      return data?.reservasi;
     } catch (e) {
       return rejectWithValue(pickErr(e));
     }
   }
 );
 
-// DELETE /reservasi/:id
+// DELETE /api/reservasi/:id
 export const deleteReservasi = createAsyncThunk(
   "reservasi/delete",
   async (id, { rejectWithValue }) => {
@@ -72,8 +78,8 @@ export const deleteReservasi = createAsyncThunk(
 const initialState = {
   items: [],
   current: null,
-  status: "idle",      // untuk fetch list/detail
-  formStatus: "idle",  // untuk create/update
+  status: "idle",
+  formStatus: "idle",
   error: null,
 };
 
@@ -97,7 +103,7 @@ const reservasiSlice = createSlice({
       })
       .addCase(fetchReservasi.fulfilled, (s, a) => {
         s.status = "succeeded";
-        s.items = a.payload;
+        s.items = Array.isArray(a.payload) ? a.payload : [];
         s.error = null;
       })
       .addCase(fetchReservasi.rejected, (s, a) => {
@@ -111,7 +117,7 @@ const reservasiSlice = createSlice({
       })
       .addCase(fetchReservasiById.fulfilled, (s, a) => {
         s.status = "succeeded";
-        s.current = a.payload;
+        s.current = a.payload ?? null;
         s.error = null;
       })
       .addCase(fetchReservasiById.rejected, (s, a) => {
@@ -139,9 +145,10 @@ const reservasiSlice = createSlice({
       })
       .addCase(updateReservasi.fulfilled, (s, a) => {
         s.formStatus = "succeeded";
-        if (a.payload) {
-          s.items = s.items.map((x) => (x.id === a.payload.id ? a.payload : x));
-          if (s.current?.id === a.payload.id) s.current = a.payload;
+        const updated = a.payload;
+        if (updated && typeof updated?.id !== "undefined") {
+          s.items = s.items.map((x) => (x.id === updated.id ? updated : x));
+          if (s.current?.id === updated.id) s.current = updated;
         }
         s.error = null;
       })

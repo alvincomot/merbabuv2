@@ -1,3 +1,4 @@
+// src/pages/informasiWisata.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchDestinations } from "@/features/destinations/destinationSlice";
@@ -28,9 +29,7 @@ const FALLBACK_IMG =
 
 const InformasiWisata = () => {
   const dispatch = useDispatch();
-  const { items: destinations, status, error } = useSelector(
-    (state) => state.destinations
-  );
+  const { items: destinations, status, error } = useSelector((s) => s.destinations);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedWisata, setSelectedWisata] = useState(null);
@@ -40,7 +39,6 @@ const InformasiWisata = () => {
     AOS.init({ duration: 800, once: true });
   }, []);
 
-  // fetch sekali saat mount
   useEffect(() => {
     if (!fetchedRef.current) {
       fetchedRef.current = true;
@@ -52,7 +50,6 @@ const InformasiWisata = () => {
     setSelectedWisata(wisata);
     setIsModalOpen(true);
   };
-
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedWisata(null);
@@ -64,9 +61,7 @@ const InformasiWisata = () => {
         <div className="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {(status === "loading" || status === "idle") &&
-              Array.from({ length: 6 }).map((_, i) => (
-                <SkeletonCard key={`skeleton-${i}`} />
-              ))}
+              Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={`skeleton-${i}`} />)}
 
             {status === "failed" && (
               <div className="col-span-full bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-center">
@@ -77,7 +72,8 @@ const InformasiWisata = () => {
                 <div className="mt-3">
                   <button
                     onClick={() => dispatch(fetchDestinations())}
-                    className="inline-block rounded bg-red-600 text-white text-sm px-4 py-2 hover:bg-red-700"
+                    disabled={status === "loading"}
+                    className="inline-block rounded bg-red-600 text-white text-sm px-4 py-2 hover:bg-red-700 disabled:opacity-60"
                   >
                     Coba lagi
                   </button>

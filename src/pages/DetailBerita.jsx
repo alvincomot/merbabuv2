@@ -1,10 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
-import { fetchNews } from "@/features/news/newsSlice";
+import { Link, useParams } from "react-router-dom";
+import { fetchNewsById } from "@/features/news/newsSlice";
 import MainLayouts from "@/components/layouts/MainLayouts";
 import AOS from "aos";
 import "aos/dist/aos.css";
+
+const FALLBACK_IMG =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 225'><rect width='100%' height='100%' fill='#e5e7eb'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='#6b7280' font-family='Arial' font-size='16'>No Image</text></svg>`
+  );
 
 const formatDate = (dateString) =>
   new Date(dateString).toLocaleDateString("id-ID", {
@@ -13,103 +19,104 @@ const formatDate = (dateString) =>
     year: "numeric",
   });
 
-const News = () => {
+const DetailBerita = () => {
+  const { id } = useParams();
   const dispatch = useDispatch();
-  const { items: allNews = [], status, error } = useSelector((state) => state.news);
+  const fetchedRef = useRef(false);
+
+  // di slice: current menampung detail yg terakhir di-fetch
+  const { current: news, status, error } = useSelector((s) => s.news);
 
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
-    if (status === "idle") {
-      dispatch(fetchNews());
-    }
-  }, [status, dispatch]);
+  }, []);
 
-  const firstArticle = allNews[0];
-  const otherArticles = allNews.slice(1);
+  useEffect(() => {
+    // fetch jika:
+    // - belum pernah fetch
+    // - atau id berbeda dengan current
+    if (!fetchedRef.current || (news && String(news.id) !== String(id))) {
+      fetchedRef.current = true;
+      dispatch(fetchNewsById(id));
+    }
+  }, [dispatch, id]); // jangan masukkan "news" ke dependency agar tidak re-fetch loop
 
   return (
     <MainLayouts>
       <section className="bg-gray-50 py-16">
         <div className="mx-auto max-w-screen-lg px-4 sm:px-6 lg:px-8">
-          {status === "loading" && (
+          <div className="mb-6">
+            <Link
+              to="/berita"
+              className="inline-flex items-center text-teal-700 hover:text-teal-800"
+            >
+              <svg
+                className="w-4 h-4 mr-2"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+              Kembali ke Berita
+            </Link>
+          </div>
+
+          {(status === "idle" || status === "loading") && (
             <p className="text-center text-gray-500">Memuat berita...</p>
           )}
 
           {status === "failed" && (
-            <p className="text-center text-red-500">
-              Gagal memuat berita{error ? `: ${error}` : "."}
-            </p>
-          )}
-
-          {status === "succeeded" && allNews.length === 0 && (
-            <div className="text-center py-16">
-              <h2 className="text-2xl font-semibold text-gray-600">Belum Ada Berita</h2>
-              <p className="mt-2 text-gray-500">
-                Saat ini belum ada berita yang tersedia untuk ditampilkan.
+            <div className="text-center bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
+              <p className="font-semibold">
+                Gagal memuat berita{error ? `: ${error}` : "."}
               </p>
+              <button
+                onClick={() => dispatch(fetchNewsById(id))}
+                className="mt-4 inline-block bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+              >
+                Coba lagi
+              </button>
             </div>
           )}
 
-          {status === "succeeded" && allNews.length > 0 && (
-            <>
-              {firstArticle && (
-                <div className="mb-12" data-aos="fade-down">
-                  <Link to={`/news/${firstArticle.id}`} className="block group">
-                    <div className="relative overflow-hidden rounded-xl shadow-lg">
-                      <img
-                        src={firstArticle.image}
-                        alt={firstArticle.judul}
-                        className="w-full h-auto md:h-96 object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    </div>
-                    <div className="p-6 bg-gray-50 -mt-2 rounded-b-xl">
-                      <h2 className="text-2xl md:text-3xl font-bold text-gray-900 group-hover:text-teal-600 transition-colors duration-300">
-                        {firstArticle.judul}
-                      </h2>
-                      <p className="mt-4 text-gray-700 leading-relaxed line-clamp-3">
-                        {firstArticle.konten}
-                      </p>
-                      <p className="mt-2 text-sm text-gray-500">
-                        Oleh {firstArticle.user?.name || "Admin"} &middot;{" "}
-                        {formatDate(firstArticle.createdAt)}
-                      </p>
-                    </div>
-                  </Link>
-                </div>
-              )}
-
-              {otherArticles.length > 0 && <hr className="my-12 border-gray-200" />}
-
-              <div className="space-y-10">
-                {otherArticles.map((article, index) => (
-                  <div key={article.id} data-aos="fade-up" data-aos-delay={index * 100}>
-                    <Link
-                      to={`/news/${article.id}`}
-                      className="flex flex-col sm:flex-row gap-6 group"
-                    >
-                      <div className="w-full sm:w-1/3 lg:w-1/4 h-48 sm:h-auto overflow-hidden rounded-lg">
-                        <img
-                          src={article.image}
-                          alt={article.judul}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                      </div>
-                      <div className="mt-4 sm:mt-0 sm:w-2/3 lg:w-3/4">
-                        <h3 className="text-xl font-bold text-gray-800 group-hover:text-teal-600 transition-colors">
-                          {article.judul}
-                        </h3>
-                        <p className="mt-3 text-gray-600 line-clamp-2">{article.konten}</p>
-                        <p className="mt-2 text-sm text-gray-500">
-                          Oleh {article.user?.name || "Admin"} &middot;{" "}
-                          {formatDate(article.createdAt)}
-                        </p>
-                      </div>
-                    </Link>
-                  </div>
-                ))}
+          {status === "succeeded" && news && (
+            <article className="bg-white rounded-xl shadow-md overflow-hidden" data-aos="fade-up">
+              <div className="relative overflow-hidden">
+                <img
+                  src={news.image || FALLBACK_IMG}
+                  onError={(e) => (e.currentTarget.src = FALLBACK_IMG)}
+                  alt={news.judul}
+                  className="w-full h-auto md:h-96 object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
               </div>
-            </>
+
+              <div className="p-6 md:p-8">
+                <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900">
+                  {news.judul}
+                </h1>
+                <p className="mt-2 text-sm text-gray-500">
+                  Oleh {news.user?.name || "Admin"} &middot; {formatDate(news.createdAt)}
+                </p>
+
+                <div className="prose prose-teal max-w-none mt-6">
+                  {/* Jika konten plain text panjang, tetap ditampilkan rapi */}
+                  <p className="whitespace-pre-wrap leading-7 text-gray-800">
+                    {news.konten}
+                  </p>
+                </div>
+              </div>
+            </article>
+          )}
+
+          {status === "succeeded" && !news && (
+            <div className="text-center py-16">
+              <h2 className="text-2xl font-semibold text-gray-600">Berita tidak ditemukan</h2>
+              <p className="mt-2 text-gray-500">Coba kembali ke halaman daftar berita.</p>
+            </div>
           )}
         </div>
       </section>
@@ -117,4 +124,4 @@ const News = () => {
   );
 };
 
-export default News;
+export default DetailBerita;
