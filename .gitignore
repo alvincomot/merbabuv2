@@ -3,7 +3,7 @@
 ### Dependencies ###
 # Abaikan folder dependensi di semua sub-direktori
 **/node_modules
-**/dist
+dist/
 
 ### Environment Variables ###
 # Abaikan file environment. JANGAN PERNAH push API keys atau password ke GitHub.
