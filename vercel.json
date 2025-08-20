@@ -2,7 +2,10 @@
   "version": 2,
   "functions": {
     "api/index.js": {
-      "includeFiles": "node_modules/.prisma/**"
+      "includeFiles": [
+        "node_modules/.prisma/client/**",
+        "node_modules/@prisma/client/**"
+      ]
     }
   },
   "routes": [
@@ -10,6 +13,6 @@
     { "handle": "filesystem" },
     { "src": "/.*", "dest": "/index.html" }
   ],
-  "buildCommand": "vite build",
+  "buildCommand": "npm run migrate:deploy && vite build",
   "outputDirectory": "dist"
 }

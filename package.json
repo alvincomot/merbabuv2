@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "start": "node api/index.js",
+    "postinstall": "prisma generate",
+    "migrate:deploy": "prisma migrate deploy",
     "dev": "vite",
     "build": "vite build",
-    "postinstall": "prisma generate",
     "lint": "eslint .",
     "preview": "vite preview"
   },
