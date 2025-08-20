@@ -1,18 +1,17 @@
 {
   "version": 2,
+  "framework": "vite",
+  "buildCommand": "prisma migrate deploy && vite build",
+  "outputDirectory": "dist",
   "functions": {
     "api/index.js": {
-      "includeFiles": [
-        "node_modules/.prisma/client/**",
-        "node_modules/@prisma/client/**"
-      ]
+      "includeFiles": "prisma/**",
+      "memory": 1024,
+      "maxDuration": 10
     }
   },
   "routes": [
     { "src": "^/api/.*", "dest": "/api/index.js" },
-    { "handle": "filesystem" },
-    { "src": "/.*", "dest": "/index.html" }
-  ],
-  "buildCommand": "npm run migrate:deploy && vite build",
-  "outputDirectory": "dist"
+    { "src": "^(?!/api/).*", "dest": "/" }
+  ]
 }
