@@ -1,29 +1,26 @@
 // api/config/Database.js
 import dotenv from "dotenv";
+import { PrismaClient } from "@prisma/client";
+
 dotenv.config();
 
-let db;
+/**
+ * Singleton pattern untuk Prisma di serverless (Vercel).
+ */
+const globalForPrisma = globalThis;
 
-if (process.env.NODE_ENV === "production") {
-  console.log("📦 Using Prisma (PostgreSQL) as DB client");
+const db =
+  globalForPrisma.__prisma ??
+  new PrismaClient({
+    log:
+      process.env.PRISMA_LOG === "true"
+        ? ["query", "error", "warn"]
+        : ["error", "warn"],
+  });
 
-  const { PrismaClient } = await import("@prisma/client");
-  db = new PrismaClient();
-
-} else {
-  console.log("📦 Using Sequelize (MySQL) as DB client");
-
-  const { Sequelize } = await import("sequelize");
-
-  db = new Sequelize(
-    process.env.DB_NAME || "db_merbabuv2",
-    process.env.DB_USER || "root",
-    process.env.DB_PASS || null,
-    {
-      host: process.env.DB_HOST || "127.0.0.1",
-      dialect: "mysql",
-    }
-  );
+// Simpan di global supaya tidak buat instance baru tiap invoke
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.__prisma = db;
 }
 
 export default db;
